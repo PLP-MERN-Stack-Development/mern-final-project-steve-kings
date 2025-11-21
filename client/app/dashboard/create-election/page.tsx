@@ -4,10 +4,12 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import Link from 'next/link';
+import PricingModal from '@/components/PricingModal';
 
 export default function CreateElectionPage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
+    const [showPricingModal, setShowPricingModal] = useState(false);
     const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
     const [thumbnailPreview, setThumbnailPreview] = useState<string>('');
     const [formData, setFormData] = useState({
@@ -48,12 +50,23 @@ export default function CreateElectionPage() {
             const res = await api.post('/elections', { ...formData, thumbnailUrl });
             // Redirect to add candidates page
             router.push(`/dashboard/elections/${res.data._id}/candidates`);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to create election', error);
-            alert('Failed to create election');
+
+            // Handle 403 - No credits available - Show pricing modal
+            if (error.response?.status === 403) {
+                setShowPricingModal(true);
+            } else {
+                alert(error.response?.data?.message || 'Failed to create election');
+            }
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handlePaymentSuccess = () => {
+        setShowPricingModal(false);
+        alert('Payment successful! Your election credit has been added. Please submit the form again.');
     };
 
     return (
@@ -176,6 +189,13 @@ export default function CreateElectionPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Pricing Modal */}
+            <PricingModal
+                isOpen={showPricingModal}
+                onClose={() => setShowPricingModal(false)}
+                onSuccess={handlePaymentSuccess}
+            />
         </div>
     );
 }

@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { createElection, getElections, getElectionById, addCandidate, vote, updateElection, deleteElection, checkEligibility } = require('../controllers/electionController');
 const { protect } = require('../middleware/authMiddleware');
+const { requireElectionCredit } = require('../middleware/electionCreditMiddleware');
 
 router.route('/')
-    .post(protect, createElection)
+    .post(protect, requireElectionCredit, createElection)
     .get(protect, getElections);
 
 router.route('/:id')

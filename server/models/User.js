@@ -25,6 +25,47 @@ const UserSchema = new mongoose.Schema({
         enum: ['admin', 'organizer', 'voter'],
         default: 'organizer'
     },
+    subscriptionStatus: {
+        type: String,
+        enum: ['free', 'premium'],
+        default: 'free'
+    },
+    electionCredits: [{
+        plan: {
+            type: String,
+            enum: ['free', 'starter', 'standard', 'unlimited'],
+            required: true
+        },
+        voterLimit: {
+            type: Number,
+            required: true
+        },
+        price: {
+            type: Number,
+            required: true
+        },
+        transactionId: {
+            type: String,
+            default: ''
+        },
+        paymentDate: {
+            type: Date,
+            default: Date.now
+        },
+        purchaseDate: {
+            type: Date,
+            default: Date.now
+        },
+        used: {
+            type: Boolean,
+            default: false
+        },
+        electionId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Election',
+            default: null
+        }
+    }],
     createdAt: {
         type: Date,
         default: Date.now

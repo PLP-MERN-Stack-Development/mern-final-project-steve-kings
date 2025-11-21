@@ -53,12 +53,12 @@ export default function HomePage() {
                             <Link href="/login" className="text-gray-600 hover:text-green-600 transition-colors font-medium">
                                 Login
                             </Link>
-                            <Link href="/register" className="btn-primary">
+                            <Link href="/pricing" className="btn-primary">
                                 Get Started Free
                             </Link>
                         </div>
                         <div className="md:hidden">
-                            <Link href="/register" className="btn-primary text-sm px-4 py-2">
+                            <Link href="/pricing" className="btn-primary text-sm px-4 py-2">
                                 Get Started
                             </Link>
                         </div>
@@ -93,7 +93,7 @@ export default function HomePage() {
                                 The simplest way to run secure, transparent elections for your organization. From student councils to community polls.
                             </p>
                             <div className="flex flex-wrap gap-4">
-                                <Link href="/register" className="btn-primary text-lg px-8 py-4 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all">
+                                <Link href="/pricing" className="btn-primary text-lg px-8 py-4 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all">
                                     Get Started Free
                                 </Link>
                                 <Link href="/how-it-works" className="bg-white border-2 border-gray-200 text-gray-700 hover:border-green-600 hover:text-green-600 px-8 py-4 rounded-lg font-semibold text-lg transition-all inline-flex items-center gap-2">
@@ -299,8 +299,8 @@ export default function HomePage() {
                             Join thousands of organizations making democratic decisions with PollSync.
                         </p>
                         <div className="relative z-10">
-                            <Link href="/register" className="bg-white text-green-600 hover:bg-gray-50 px-10 py-5 rounded-full font-bold text-xl transition-all shadow-lg hover:shadow-xl hover:scale-105 inline-flex items-center gap-2">
-                                Create Free Account
+                            <Link href="/pricing" className="bg-white text-green-600 hover:bg-gray-50 px-10 py-5 rounded-full font-bold text-xl transition-all shadow-lg hover:shadow-xl hover:scale-105 inline-flex items-center gap-2">
+                                Get Started Now
                                 <i className="fas fa-arrow-right"></i>
                             </Link>
                             <p className="mt-4 text-sm text-green-100 opacity-80">

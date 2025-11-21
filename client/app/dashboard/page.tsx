@@ -163,10 +163,10 @@ export default function DashboardPage() {
                             </div>
                             <h3 className="text-xl font-bold text-gray-900 mb-2">No elections yet</h3>
                             <p className="text-gray-500 mb-8 max-w-md mx-auto">
-                                Get started by creating your first election. It only takes a few minutes to set up.
+                                Get started by selecting a plan and creating your first election.
                             </p>
                             <Link
-                                href="/dashboard/create-election"
+                                href="/pricing"
                                 className="btn-primary"
                             >
                                 <i className="fas fa-plus mr-2"></i>

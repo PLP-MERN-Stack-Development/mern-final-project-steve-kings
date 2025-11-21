@@ -29,6 +29,11 @@ io.on('connection', (socket) => {
         console.log(`User ${socket.id} joined election ${electionId}`);
     });
 
+    socket.on('join_room', (userId) => {
+        socket.join(userId);
+        console.log(`User ${socket.id} joined room ${userId}`);
+    });
+
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
     });
@@ -49,6 +54,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/elections', require('./routes/elections'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/payment', require('./routes/payment'));
 
 const PORT = process.env.PORT || 5000;
 

@@ -8,7 +8,10 @@ const AllowedVoter = require('../models/AllowedVoter');
 // @access  Private
 exports.createElection = async (req, res) => {
     try {
-        const { title, organization, description, startDate, endDate } = req.body;
+        const { title, organization, description, startDate, endDate, thumbnailUrl } = req.body;
+
+        // req.electionCredit is attached by requireElectionCredit middleware
+        const credit = req.electionCredit;
 
         const election = new Election({
             title,
@@ -16,12 +19,32 @@ exports.createElection = async (req, res) => {
             description,
             startDate,
             endDate,
-            organizer: req.user._id
+            organizer: req.user._id,
+            thumbnailUrl: thumbnailUrl || '',
+            voterLimit: credit.voterLimit, // Store the voter limit from the plan
+            planType: credit.plan // Store which plan was used
         });
 
         const createdElection = await election.save();
+
+        // Mark the credit as used and link it to this election
+        const User = require('../models/User');
+        await User.findByIdAndUpdate(
+            req.user._id,
+            {
+                $set: {
+                    'electionCredits.$[elem].used': true,
+                    'electionCredits.$[elem].electionId': createdElection._id
+                }
+            },
+            {
+                arrayFilters: [{ 'elem._id': credit._id }]
+            }
+        );
+
         res.status(201).json(createdElection);
     } catch (error) {
+        console.error('Create election error:', error);
         res.status(500).json({ message: error.message });
     }
 };
@@ -138,6 +161,21 @@ exports.vote = async (req, res) => {
         const now = new Date();
         if (now < election.startDate || now > election.endDate) {
             return res.status(400).json({ message: 'Election is not active' });
+        }
+
+        // Check voter limit based on plan
+        if (election.voterLimit !== -1) {
+            // Count unique voters (distinct voterIds)
+            const uniqueVoterCount = await Vote.distinct('voterId', { election: election._id }).then(voters => voters.length);
+
+            if (uniqueVoterCount >= election.voterLimit) {
+                return res.status(403).json({
+                    message: `Voter limit reached! This election is limited to ${election.voterLimit} voters (${election.planType} plan).`,
+                    upgrade: true,
+                    currentPlan: election.planType,
+                    voterLimit: election.voterLimit
+                });
+            }
         }
 
         // Check eligibility (if whitelist exists)
