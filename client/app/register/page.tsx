@@ -64,22 +64,22 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen bg-white flex items-center justify-center px-4">
+        <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-orange-50 flex items-center justify-center px-4 py-8">
             <div className="w-full max-w-md">
                 {/* Logo */}
                 <div className="text-center mb-8">
-                    <Link href="/" className="inline-flex items-center justify-center space-x-2 mb-4">
-                        <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
-                            <i className="fas fa-vote-yea text-white text-xl"></i>
+                    <Link href="/" className="inline-flex items-center justify-center space-x-2 mb-4 hover:opacity-80 transition-opacity">
+                        <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center shadow-lg">
+                            <i className="fas fa-vote-yea text-white text-2xl"></i>
                         </div>
-                        <span className="text-2xl font-bold text-gray-900">PollSync</span>
+                        <span className="text-3xl font-bold text-gray-900">PollSync</span>
                     </Link>
-                    <h1 className="text-2xl font-normal text-gray-900 mb-2">Create your account</h1>
-                    <p className="text-sm text-gray-600">Get started with PollSync</p>
+                    <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-2">Create your account</h1>
+                    <p className="text-sm md:text-base text-gray-600">Join thousands of organizations using PollSync</p>
                 </div>
 
                 {/* Form */}
-                <div className="card-google p-8">
+                <div className="card-google p-6 md:p-8 shadow-xl">
                     {/* Google Sign-Up Button */}
                     <div className="mb-6">
                         <GoogleSignInButton
@@ -192,15 +192,24 @@ export default function RegisterPage() {
                     <div className="mt-6 text-center">
                         <p className="text-sm text-gray-600">
                             Already have an account?{' '}
-                            <Link href="/login" className="text-green-600 hover:underline font-medium">
+                            <Link href="/login" className="text-green-600 hover:text-green-700 font-semibold transition-colors">
                                 Sign in
                             </Link>
+                        </p>
+                    </div>
+
+                    <div className="mt-4 pt-4 border-t border-gray-100 text-center">
+                        <p className="text-xs text-gray-500">
+                            By creating an account, you agree to our{' '}
+                            <Link href="#" className="text-green-600 hover:underline">Terms</Link>
+                            {' '}and{' '}
+                            <Link href="#" className="text-green-600 hover:underline">Privacy Policy</Link>
                         </p>
                     </div>
                 </div>
 
                 <div className="mt-6 text-center">
-                    <Link href="/" className="text-sm text-green-600 hover:underline inline-flex items-center">
+                    <Link href="/" className="text-sm text-green-600 hover:text-green-700 font-medium inline-flex items-center transition-colors">
                         <i className="fas fa-arrow-left mr-2"></i>
                         Back to home
                     </Link>

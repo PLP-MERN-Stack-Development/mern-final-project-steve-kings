@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import PaymentButton from '@/components/payment/payment';
 import { useAuth } from '@/context/AuthContext';
+import MobileMenu from '@/components/MobileMenu';
 
 interface PricingPlan {
     planId: string;
@@ -66,8 +68,42 @@ export default function PricingPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 font-sans py-20 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen bg-gray-50 font-sans">
+            {/* Navigation */}
+            <nav className="bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+                <div className="container-google">
+                    <div className="flex justify-between items-center h-16">
+                        <Link href="/" className="flex items-center space-x-2">
+                            <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center shadow-md">
+                                <i className="fas fa-vote-yea text-white text-xl"></i>
+                            </div>
+                            <span className="text-xl font-bold text-gray-900 tracking-tight">
+                                PollSync
+                            </span>
+                        </Link>
+                        <div className="hidden md:flex items-center space-x-8">
+                            <Link href="/features" className="text-gray-600 hover:text-green-600 transition-colors font-medium">
+                                Features
+                            </Link>
+                            <Link href="/how-it-works" className="text-gray-600 hover:text-green-600 transition-colors font-medium">
+                                How It Works
+                            </Link>
+                            <Link href="/pricing" className="text-green-600 font-semibold">
+                                Pricing
+                            </Link>
+                            <Link href="/login" className="text-gray-600 hover:text-green-600 transition-colors font-medium">
+                                Login
+                            </Link>
+                            <Link href="/register" className="btn-primary">
+                                Get Started Free
+                            </Link>
+                        </div>
+                        <MobileMenu />
+                    </div>
+                </div>
+            </nav>
+
+            <div className="max-w-7xl mx-auto py-20 px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-16">
                     <h2 className="text-base font-semibold text-green-600 tracking-wide uppercase">Pay Per Election</h2>
                     <p className="mt-2 text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">

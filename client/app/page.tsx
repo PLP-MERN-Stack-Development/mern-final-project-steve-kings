@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect } from 'react';
+import MobileMenu from '@/components/MobileMenu';
 
 export default function HomePage() {
     useEffect(() => {
@@ -57,11 +58,7 @@ export default function HomePage() {
                                 Get Started Free
                             </Link>
                         </div>
-                        <div className="md:hidden">
-                            <Link href="/pricing" className="btn-primary text-sm px-4 py-2">
-                                Get Started
-                            </Link>
-                        </div>
+                        <MobileMenu />
                     </div>
                 </div>
             </nav>

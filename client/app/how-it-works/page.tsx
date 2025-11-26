@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect } from 'react';
+import MobileMenu from '@/components/MobileMenu';
 
 export default function HowItWorksPage() {
     useEffect(() => {
@@ -58,6 +59,7 @@ export default function HowItWorksPage() {
                                 Get Started
                             </Link>
                         </div>
+                        <MobileMenu />
                     </div>
                 </div>
             </nav>
