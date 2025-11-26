@@ -83,6 +83,18 @@ export default function PricingPage() {
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
                         <p className="mt-4 text-gray-600">Loading pricing plans...</p>
                     </div>
+                ) : plans.length === 0 ? (
+                    <div className="text-center py-12 bg-white rounded-xl shadow-sm border">
+                        <div className="text-red-500 text-4xl mb-4">⚠️</div>
+                        <p className="text-xl font-semibold text-gray-900 mb-2">Unable to load pricing plans</p>
+                        <p className="text-gray-600 mb-4">Please check your connection and try again</p>
+                        <button 
+                            onClick={fetchPricing}
+                            className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                        >
+                            Retry
+                        </button>
+                    </div>
                 ) : (
                     <div className="grid max-w-lg mx-auto gap-8 lg:grid-cols-4 lg:max-w-none">
                         {plans.map((plan, index) => {
