@@ -5,7 +5,8 @@ const PricingPlan = require('./models/PricingPlan');
 async function initializePricing() {
     try {
         console.log('🔌 Connecting to MongoDB...');
-        await mongoose.connect(process.env.MONGO_URI);
+        const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI;
+        await mongoose.connect(mongoUri);
         console.log('✅ Connected to MongoDB\n');
 
         console.log('💰 Initializing pricing plans...');

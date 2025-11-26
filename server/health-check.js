@@ -35,7 +35,7 @@ console.log('\n🔍 Checking environment variables...');
 require('dotenv').config();
 
 const requiredEnvVars = [
-    'MONGO_URI',
+    'MONGODB_URI',
     'JWT_SECRET',
     'PORT'
 ];
