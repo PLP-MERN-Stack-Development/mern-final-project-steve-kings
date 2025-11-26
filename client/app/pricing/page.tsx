@@ -1,44 +1,43 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PaymentButton from '@/components/payment/payment';
 import { useAuth } from '@/context/AuthContext';
+
+interface PricingPlan {
+    planId: string;
+    name: string;
+    price: number;
+    voterLimit: number;
+    currency: string;
+    description?: string;
+    features?: string[];
+}
 
 export default function PricingPage() {
     const { user } = useAuth();
     const [phoneNumber, setPhoneNumber] = useState('');
     const [selectedPlan, setSelectedPlan] = useState<{ name: string; price: number; voters: string } | null>(null);
+    const [plans, setPlans] = useState<PricingPlan[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const plans = [
-        {
-            name: 'Free',
-            voters: '10 Voters',
-            price: 5,
-            features: ['Up to 10 Voters', 'Basic Analytics', 'Email Support', '3 Days Duration', 'Perfect for Testing'],
-            recommended: false
-        },
-        {
-            name: 'Starter',
-            voters: '50 Voters',
-            price: 500,
-            features: ['Up to 50 Voters', 'Basic Analytics', 'Email Support', '7 Days Duration', 'Public Results'],
-            recommended: false
-        },
-        {
-            name: 'Standard',
-            voters: '200 Voters',
-            price: 1500,
-            features: ['Up to 200 Voters', 'Advanced Analytics', 'Priority Support', '30 Days Duration', 'Candidate Profiles'],
-            recommended: true
-        },
-        {
-            name: 'Unlimited',
-            voters: 'Unlimited Voters',
-            price: 3000,
-            features: ['Unlimited Voters', 'Real-time Results', '24/7 Support', 'Unlimited Duration', 'Custom Branding', 'Export Data'],
-            recommended: false
+    useEffect(() => {
+        fetchPricing();
+    }, []);
+
+    const fetchPricing = async () => {
+        try {
+            const response = await fetch('http://localhost:5000/api/pricing');
+            if (response.ok) {
+                const data = await response.json();
+                setPlans(data.plans);
+            }
+        } catch (error) {
+            console.error('Error fetching pricing:', error);
+        } finally {
+            setLoading(false);
         }
-    ];
+    };
 
     const handlePaymentSuccess = () => {
         if (user) {
@@ -68,62 +67,97 @@ export default function PricingPage() {
                     </p>
                 </div>
 
-                <div className="grid max-w-lg mx-auto gap-8 lg:grid-cols-4 lg:max-w-none">
-                    {plans.map((plan) => (
-                        <div
-                            key={plan.name}
-                            className={`flex flex-col rounded-2xl shadow-lg overflow-hidden bg-white border transition-all cursor-pointer relative ${selectedPlan?.name === plan.name
-                                    ? 'border-green-500 ring-2 ring-green-500 transform scale-105 z-10'
-                                    : 'border-gray-100 hover:shadow-xl hover:-translate-y-1'
-                                }`}
-                            onClick={() => setSelectedPlan(plan)}
-                        >
-                            {plan.recommended && (
-                                <div className="absolute top-0 right-0 -mt-2 -mr-2 w-20 h-20 overflow-hidden">
-                                    <div className="absolute top-0 right-0 bg-green-500 text-white text-xs font-bold px-8 py-1 transform rotate-45 translate-x-4 translate-y-4 shadow-md">
-                                        BEST
+                {loading ? (
+                    <div className="text-center py-12">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+                        <p className="mt-4 text-gray-600">Loading pricing plans...</p>
+                    </div>
+                ) : (
+                    <div className="grid max-w-lg mx-auto gap-8 lg:grid-cols-4 lg:max-w-none">
+                        {plans.map((plan, index) => {
+                            const votersText = plan.voterLimit === -1 ? 'Unlimited Voters' : `${plan.voterLimit} Voters`;
+                            const isRecommended = plan.planId === 'standard';
+                            
+                            return (
+                                <div
+                                    key={plan.planId}
+                                    className={`flex flex-col rounded-2xl shadow-lg overflow-hidden bg-white border transition-all cursor-pointer relative ${selectedPlan?.name === plan.name
+                                            ? 'border-green-500 ring-2 ring-green-500 transform scale-105 z-10'
+                                            : 'border-gray-100 hover:shadow-xl hover:-translate-y-1'
+                                        }`}
+                                    onClick={() => setSelectedPlan({ name: plan.name, price: plan.price, voters: votersText })}
+                                >
+                                    {isRecommended && (
+                                        <div className="absolute top-0 right-0 -mt-2 -mr-2 w-20 h-20 overflow-hidden">
+                                            <div className="absolute top-0 right-0 bg-green-500 text-white text-xs font-bold px-8 py-1 transform rotate-45 translate-x-4 translate-y-4 shadow-md">
+                                                BEST
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div className="px-6 py-8 sm:p-10 sm:pb-6">
+                                        <div>
+                                            <h3 className={`inline-flex px-4 py-1 rounded-full text-sm font-semibold tracking-wide uppercase ${selectedPlan?.name === plan.name ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'
+                                                }`}>
+                                                {plan.name}
+                                            </h3>
+                                        </div>
+                                        <div className="mt-4 flex items-baseline text-5xl font-extrabold text-gray-900">
+                                            {plan.currency} {plan.price.toLocaleString()}
+                                        </div>
+                                        <p className="mt-5 text-lg text-gray-500">
+                                            {plan.description || `For elections with up to ${votersText}`}
+                                        </p>
+                                    </div>
+                                    <div className="flex-1 flex flex-col justify-between px-6 pt-6 pb-8 bg-gray-50 space-y-6 sm:p-10 sm:pt-6">
+                                        <ul className="space-y-4">
+                                            {plan.features && plan.features.length > 0 ? (
+                                                plan.features.map((feature, idx) => (
+                                                    <li key={idx} className="flex items-start">
+                                                        <div className="flex-shrink-0">
+                                                            <i className="fas fa-check text-green-500"></i>
+                                                        </div>
+                                                        <p className="ml-3 text-base text-gray-700">{feature}</p>
+                                                    </li>
+                                                ))
+                                            ) : (
+                                                <>
+                                                    <li className="flex items-start">
+                                                        <div className="flex-shrink-0">
+                                                            <i className="fas fa-check text-green-500"></i>
+                                                        </div>
+                                                        <p className="ml-3 text-base text-gray-700">Up to {votersText}</p>
+                                                    </li>
+                                                    <li className="flex items-start">
+                                                        <div className="flex-shrink-0">
+                                                            <i className="fas fa-check text-green-500"></i>
+                                                        </div>
+                                                        <p className="ml-3 text-base text-gray-700">Real-time Results</p>
+                                                    </li>
+                                                    <li className="flex items-start">
+                                                        <div className="flex-shrink-0">
+                                                            <i className="fas fa-check text-green-500"></i>
+                                                        </div>
+                                                        <p className="ml-3 text-base text-gray-700">Email Support</p>
+                                                    </li>
+                                                </>
+                                            )}
+                                        </ul>
+                                        <div className="rounded-md shadow">
+                                            <button
+                                                className={`flex items-center justify-center px-5 py-3 border text-base font-medium rounded-md w-full transition-colors ${selectedPlan?.name === plan.name
+                                                        ? 'bg-green-600 text-white hover:bg-green-700 border-transparent'
+                                                        : 'bg-white text-green-600 hover:bg-gray-50 border-green-200'
+                                                    }`}
+                                            >
+                                                {selectedPlan?.name === plan.name ? 'Selected' : 'Select Plan'}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                            )}
-                            <div className="px-6 py-8 sm:p-10 sm:pb-6">
-                                <div>
-                                    <h3 className={`inline-flex px-4 py-1 rounded-full text-sm font-semibold tracking-wide uppercase ${selectedPlan?.name === plan.name ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'
-                                        }`}>
-                                        {plan.name}
-                                    </h3>
-                                </div>
-                                <div className="mt-4 flex items-baseline text-5xl font-extrabold text-gray-900">
-                                    KES {plan.price.toLocaleString()}
-                                </div>
-                                <p className="mt-5 text-lg text-gray-500">
-                                    For elections with up to <strong className="text-gray-900">{plan.voters}</strong>.
-                                </p>
-                            </div>
-                            <div className="flex-1 flex flex-col justify-between px-6 pt-6 pb-8 bg-gray-50 space-y-6 sm:p-10 sm:pt-6">
-                                <ul className="space-y-4">
-                                    {plan.features.map((feature) => (
-                                        <li key={feature} className="flex items-start">
-                                            <div className="flex-shrink-0">
-                                                <i className="fas fa-check text-green-500"></i>
-                                            </div>
-                                            <p className="ml-3 text-base text-gray-700">{feature}</p>
-                                        </li>
-                                    ))}
-                                </ul>
-                                <div className="rounded-md shadow">
-                                    <button
-                                        className={`flex items-center justify-center px-5 py-3 border text-base font-medium rounded-md w-full transition-colors ${selectedPlan?.name === plan.name
-                                                ? 'bg-green-600 text-white hover:bg-green-700 border-transparent'
-                                                : 'bg-white text-green-600 hover:bg-gray-50 border-green-200'
-                                            }`}
-                                    >
-                                        {selectedPlan?.name === plan.name ? 'Selected' : 'Select Plan'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                            );
+                        })}
+                    </div>
+                )}
 
                 {/* Payment Section */}
                 <div className={`mt-16 transition-all duration-500 ease-in-out ${selectedPlan ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'}`}>

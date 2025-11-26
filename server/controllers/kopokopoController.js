@@ -1,4 +1,26 @@
 const axios = require('axios');
+const { sendEmail, emailTemplates } = require('../config/emailService');
+const PricingPlan = require('../models/PricingPlan');
+
+// Helper function to get plan details by amount
+const getPlanByAmount = async (amount) => {
+    try {
+        const plans = await PricingPlan.find({ enabled: true });
+        const plan = plans.find(p => p.price === parseFloat(amount));
+        
+        if (plan) {
+            return {
+                plan: plan.planId,
+                voterLimit: plan.voterLimit,
+                price: plan.price
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error('Error getting plan by amount:', error);
+        return null;
+    }
+};
 
 // Kopokopo Credentials from .env
 const CLIENT_ID = process.env.KOPOKOPO_CLIENT_ID;
@@ -57,63 +79,116 @@ exports.initiateSTKPush = async (req, res) => {
     if (isTestMode) {
         console.log('⚠️  TEST MODE: Kopokopo not configured, simulating payment');
 
-        // Simulate async payment processing
+        const testTransactionId = `TEST_TXN_${Date.now()}`;
+        
+        // Create pending transaction
+        const Transaction = require('../models/Transaction');
+        const User = require('../models/User');
+        
+        const paymentAmount = parseFloat(amount);
+        const planDetails = await getPlanByAmount(paymentAmount);
+
+        // Create transaction record
+        const transaction = new Transaction({
+            transactionId: testTransactionId,
+            amount: paymentAmount,
+            currency: 'KES',
+            status: 'Pending',
+            phoneNumber: formattedPhone,
+            userId: req.user ? req.user._id : null,
+            plan: planDetails ? planDetails.plan : null,
+            voterLimit: planDetails ? planDetails.voterLimit : 0,
+            metadata: { testMode: true }
+        });
+        await transaction.save();
+
+        // Store user ID for use in setTimeout
+        const userId = req.user ? req.user._id.toString() : null;
+        const io = req.app.get('io');
+
+        // Simulate async payment processing (happens in background)
         setTimeout(async () => {
-            console.log('📱 Simulating payment success...');
+            console.log('📱 TEST MODE: Simulating payment success...');
 
-            // Add credit to user's account
-            if (req.user) {
+            try {
+                // Reload transaction from database
+                const Transaction = require('../models/Transaction');
                 const User = require('../models/User');
-                const user = await User.findById(req.user._id);
-
-                if (user) {
-                    let planDetails = null;
-                    const paymentAmount = parseFloat(amount);
-
-                    if (paymentAmount === 5) {
-                        planDetails = { plan: 'free', voterLimit: 10, price: 5 };
-                    } else if (paymentAmount === 500) {
-                        planDetails = { plan: 'starter', voterLimit: 50, price: 500 };
-                    } else if (paymentAmount === 1500) {
-                        planDetails = { plan: 'standard', voterLimit: 200, price: 1500 };
-                    } else if (paymentAmount === 3000) {
-                        planDetails = { plan: 'unlimited', voterLimit: -1, price: 3000 };
-                    }
-
-                    if (planDetails) {
-                        user.electionCredits.push({
-                            ...planDetails,
-                            transactionId: `TEST_TXN_${Date.now()}`,
-                            paymentDate: new Date()
-                        });
-                        await user.save();
-
-                        console.log(`✅ TEST: Credit added to user ${user.username}`);
-
-                        // Emit socket event
-                        const io = req.app.get('io');
-                        if (io) {
-                            io.to(req.user._id.toString()).emit('payment_success', {
-                                status: 'success',
-                                amount: amount,
-                                transactionId: `TEST_TXN_${Date.now()}`,
-                                plan: planDetails.plan,
-                                timestamp: Date.now()
-                            });
-                            console.log('✅ TEST: Socket event emitted');
-                        }
-                    }
+                
+                const txn = await Transaction.findOne({ transactionId: testTransactionId });
+                if (!txn) {
+                    console.error('❌ TEST: Transaction not found');
+                    return;
                 }
-            }
-        }, 3000); // Simulate 3 second delay
 
+                // Update transaction
+                txn.status = 'Success';
+                txn.processed = true;
+                await txn.save();
+                console.log('✅ TEST: Transaction updated to Success');
+
+                // Add credit to user's account
+                if (userId && planDetails) {
+                    const user = await User.findById(userId);
+
+                    if (user) {
+                        // Check if credit already exists
+                        const existingCredit = user.electionCredits.find(
+                            c => c.transactionId === testTransactionId
+                        );
+
+                        if (!existingCredit) {
+                            user.electionCredits.push({
+                                ...planDetails,
+                                transactionId: testTransactionId,
+                                paymentDate: new Date()
+                            });
+                            
+                            await user.save();
+
+                            console.log(`✅ TEST: Package added to user ${user.username}`);
+                            console.log(`   Plan: ${planDetails.plan}`);
+                            console.log(`   Voter Limit: ${planDetails.voterLimit}`);
+                            console.log(`   Package can be used for 1 election`);
+
+                            // Emit socket event
+                            if (io) {
+                                io.to(userId).emit('payment_success', {
+                                    status: 'success',
+                                    amount: paymentAmount,
+                                    transactionId: testTransactionId,
+                                    plan: planDetails.plan,
+                                    voterLimit: planDetails.voterLimit,
+                                    timestamp: Date.now()
+                                });
+                                console.log('✅ TEST: Socket event emitted to room:', userId);
+                            } else {
+                                console.error('❌ TEST: Socket.io not available');
+                            }
+                        } else {
+                            console.log('⚠️  TEST: Credit already exists');
+                        }
+                    } else {
+                        console.error('❌ TEST: User not found:', userId);
+                    }
+                } else {
+                    console.error('❌ TEST: No user ID or plan details');
+                }
+            } catch (error) {
+                console.error('❌ TEST: Error in payment simulation:', error);
+            }
+        }, 5000); // Simulate 5 second delay for payment
+
+        // Return immediately - don't wait for payment
         return res.status(200).json({
             success: true,
-            message: 'TEST MODE: Payment simulated successfully',
+            message: 'TEST MODE: STK Push sent. Complete payment on your phone.',
             testMode: true,
             data: {
-                reference: `TEST_${Date.now()}`,
-                status: 'Success'
+                transactionId: testTransactionId,
+                reference: testTransactionId,
+                status: 'Pending',
+                message: 'Check your phone for M-Pesa prompt'
             }
         });
     }
@@ -156,10 +231,44 @@ exports.initiateSTKPush = async (req, res) => {
 
         console.log('Kopokopo Response:', response.status, response.data);
 
+        // Extract transaction reference from response
+        const transactionRef = response.data.resource_id || response.data.id || `KPK_${Date.now()}`;
+
+        // Create pending transaction record
+        const Transaction = require('../models/Transaction');
+        const paymentAmount = parseFloat(amount);
+        const planDetails = await getPlanByAmount(paymentAmount);
+
+        const transaction = new Transaction({
+            transactionId: transactionRef,
+            amount: paymentAmount,
+            currency: 'KES',
+            status: 'Pending',
+            phoneNumber: formattedPhone,
+            userId: req.user ? req.user._id : null,
+            plan: planDetails ? planDetails.plan : null,
+            voterLimit: planDetails ? planDetails.voterLimit : 0,
+            metadata: { 
+                user_id: req.user ? req.user._id : 'guest',
+                purpose: 'ELECTION_PAYMENT'
+            },
+            rawResponse: response.data
+        });
+        await transaction.save();
+
+        console.log(`✅ Transaction created: ${transactionRef}`);
+
+        // Return immediately - don't wait for payment
         res.status(200).json({
             success: true,
-            message: 'STK Push initiated successfully',
-            data: response.data
+            message: 'STK Push sent successfully. Complete payment on your phone.',
+            data: {
+                transactionId: transactionRef,
+                reference: transactionRef,
+                status: 'Pending',
+                message: 'Check your phone for M-Pesa prompt',
+                kopokopo: response.data
+            }
         });
 
     } catch (error) {
@@ -187,64 +296,201 @@ exports.handleCallback = async (req, res) => {
     try {
         const { topic, event } = req.body;
 
-        console.log('Received Kopokopo Webhook:', topic);
+        console.log('=== Kopokopo Webhook Received ===');
+        console.log('Topic:', topic);
         console.log('Event data:', JSON.stringify(event, null, 2));
+        console.log('Full body:', JSON.stringify(req.body, null, 2));
 
-        if (topic === 'incoming_payment') {
-            const { status, amount, metadata, resource } = event;
+        // Kopokopo sends different topics: buygoods_transaction_received, b2b_transaction_received, etc.
+        if (topic === 'buygoods_transaction_received' || topic === 'incoming_payment') {
+            const { resource } = event;
+            const Transaction = require('../models/Transaction');
+            const User = require('../models/User');
 
-            if (resource.status === 'Success') {
-                const userId = resource.metadata.user_id;
-                const paymentAmount = parseFloat(resource.amount.value);
+            // Handle both formats: Kopokopo API v1 and custom incoming_payment
+            const mpesaReceiptNumber = resource.reference || resource.id;
+            const paymentAmount = parseFloat(resource.amount?.value || resource.amount);
+            const phoneNumber = resource.sender_phone_number;
+            
+            // Get user ID from metadata or from our transaction record
+            let userId = resource.metadata ? resource.metadata.user_id : null;
 
-                // Determine plan based on amount
-                let planDetails = null;
-                if (paymentAmount === 5) {
-                    planDetails = { plan: 'free', voterLimit: 10, price: 5 };
-                } else if (paymentAmount === 500) {
-                    planDetails = { plan: 'starter', voterLimit: 50, price: 500 };
-                } else if (paymentAmount === 1500) {
-                    planDetails = { plan: 'standard', voterLimit: 200, price: 1500 };
-                } else if (paymentAmount === 3000) {
-                    planDetails = { plan: 'unlimited', voterLimit: -1, price: 3000 };
+            console.log('Processing payment:');
+            console.log('- Transaction ID:', mpesaReceiptNumber);
+            console.log('- Amount:', paymentAmount);
+            console.log('- Phone:', phoneNumber);
+            console.log('- User ID:', userId);
+            console.log('- Status:', resource.status);
+
+            // Determine plan based on amount (dynamic from database)
+            const planDetails = await getPlanByAmount(paymentAmount);
+            
+            if (!planDetails) {
+                console.log(`⚠️  Amount ${paymentAmount} doesn't match any active pricing plan`);
+            }
+
+            // 1. Check if transaction already exists
+            let transaction = await Transaction.findOne({ transactionId: mpesaReceiptNumber });
+            
+            // If no transaction found by M-Pesa receipt, try to find by phone number and amount
+            if (!transaction && phoneNumber && paymentAmount) {
+                console.log('Transaction not found by ID, searching by phone and amount...');
+                transaction = await Transaction.findOne({
+                    phoneNumber: phoneNumber,
+                    amount: paymentAmount,
+                    status: 'Pending',
+                    createdAt: { $gte: new Date(Date.now() - 10 * 60 * 1000) } // Within last 10 minutes
+                }).sort({ createdAt: -1 });
+                
+                if (transaction) {
+                    console.log('Found matching pending transaction:', transaction.transactionId);
+                    // Update with M-Pesa receipt number
+                    transaction.transactionId = mpesaReceiptNumber;
+                    userId = transaction.userId; // Get user ID from our transaction
+                }
+            }
+            
+            if (transaction) {
+                console.log('Updating existing transaction...');
+                transaction.status = resource.status || 'Success';
+                transaction.updatedAt = Date.now();
+                if (planDetails) {
+                    transaction.plan = planDetails.plan;
+                    transaction.voterLimit = planDetails.voterLimit;
+                }
+                await transaction.save();
+            } else {
+                // Create new transaction
+                console.log('Creating new transaction record...');
+                transaction = new Transaction({
+                    transactionId: mpesaReceiptNumber,
+                    amount: paymentAmount,
+                    currency: resource.amount?.currency || 'KES',
+                    status: resource.status || 'Success',
+                    phoneNumber: phoneNumber,
+                    userId: (userId && userId !== 'guest') ? userId : null,
+                    plan: planDetails ? planDetails.plan : null,
+                    voterLimit: planDetails ? planDetails.voterLimit : 0,
+                    metadata: resource.metadata || {},
+                    rawResponse: event
+                });
+                await transaction.save();
+                console.log(`✅ Transaction logged: ${transaction.transactionId}`);
+            }
+
+            // 2. Process payments based on status
+            // Kopokopo uses "Received" status for successful payments
+            const isSuccess = resource.status === 'Success' || resource.status === 'Received';
+            
+            if (isSuccess && planDetails) {
+                let user = null;
+
+                // Try to find user by ID from metadata
+                if (userId && userId !== 'guest') {
+                    user = await User.findById(userId);
+                    console.log('Found user by ID:', user ? user.username : 'Not found');
                 }
 
-                if (userId && userId !== 'guest' && planDetails) {
-                    // Update user with election credit
-                    const User = require('../models/User');
-                    const user = await User.findById(userId);
+                // Fallback: Try to find user by phone number
+                if (!user && phoneNumber) {
+                    user = await User.findOne({ phoneNumber: phoneNumber });
+                    
+                    if (!user) {
+                        const localPhone = phoneNumber.replace('+254', '0');
+                        user = await User.findOne({ phoneNumber: localPhone });
+                    }
+                    
+                    console.log('Found user by phone:', user ? user.username : 'Not found');
+                }
 
-                    if (user) {
-                        // Add credit with transaction details
+                if (user) {
+                    // Check if credit already added (prevent duplicates)
+                    const existingCredit = user.electionCredits.find(
+                        credit => credit.transactionId === mpesaReceiptNumber
+                    );
+
+                    if (existingCredit) {
+                        console.log('⚠️  Credit already added for this transaction');
+                    } else {
+                        // Add election package
                         user.electionCredits.push({
                             ...planDetails,
-                            transactionId: resource.id || resource.reference || 'N/A',
+                            transactionId: mpesaReceiptNumber,
+                            price: paymentAmount,
                             paymentDate: new Date(resource.timestamp || Date.now())
                         });
+
                         await user.save();
-                        console.log(`User ${user.username} received ${planDetails.plan} election credit`);
-                        console.log(`Transaction ID: ${resource.id || resource.reference}`);
-                        console.log(`Payment Time: ${new Date(resource.timestamp || Date.now())}`);
+                        console.log(`✅ User ${user.username} received ${planDetails.plan} election package`);
+                        console.log(`   Transaction ID: ${mpesaReceiptNumber}`);
+                        console.log(`   Voter Limit: ${planDetails.voterLimit === -1 ? 'Unlimited' : planDetails.voterLimit}`);
+                        console.log(`   Package can be used for 1 election`);
+
+                        // Mark transaction as processed
+                        transaction.processed = true;
+                        await transaction.save();
+
+                        // Send payment success email (non-blocking)
+                        const voterLimit = planDetails.voterLimit === -1 ? 'Unlimited' : planDetails.voterLimit;
+                        const paymentTemplate = emailTemplates.paymentSuccess(
+                            user.username,
+                            paymentAmount,
+                            `${planDetails.plan} package (${voterLimit} voters)`
+                        );
+                        sendEmail({
+                            to: user.email,
+                            ...paymentTemplate
+                        }).catch(err => console.error('Payment email error:', err));
 
                         // Emit socket event to client if connected
                         const io = req.app.get('io');
                         if (io) {
-                            io.to(userId.toString()).emit('payment_success', {
+                            io.to(user._id.toString()).emit('payment_success', {
                                 status: 'success',
-                                amount: resource.amount.value,
-                                transactionId: resource.id || resource.reference,
+                                amount: paymentAmount,
+                                transactionId: mpesaReceiptNumber,
                                 plan: planDetails.plan,
+                                voterLimit: planDetails.voterLimit,
                                 timestamp: resource.timestamp || Date.now()
                             });
+                            console.log('✅ Socket event emitted to user');
                         }
                     }
+                } else {
+                    console.error('❌ Could not find user to assign credit to');
+                    console.error('   Phone:', phoneNumber);
+                    console.error('   User ID:', userId);
+                }
+            } else if (resource.status === 'Failed' || resource.status === 'Cancelled') {
+                console.log(`❌ Payment ${resource.status.toLowerCase()}`);
+                
+                // Emit failure/cancelled event if user found
+                if (userId && userId !== 'guest') {
+                    const user = await User.findById(userId);
+                    if (user) {
+                        const io = req.app.get('io');
+                        if (io) {
+                            io.to(user._id.toString()).emit('payment_failed', {
+                                status: resource.status.toLowerCase(),
+                                amount: paymentAmount,
+                                transactionId: mpesaReceiptNumber,
+                                message: resource.status === 'Cancelled' ? 'Payment cancelled by user' : 'Payment failed',
+                                timestamp: resource.timestamp || Date.now()
+                            });
+                            console.log(`✅ ${resource.status} event emitted to user`);
+                        }
+                    }
+                } else {
+                    console.log('⚠️  No user found to notify about cancellation');
                 }
             }
         }
 
+        console.log('=== Webhook Processing Complete ===\n');
         res.status(200).json({ success: true });
     } catch (error) {
-        console.error('Webhook Error:', error);
-        res.status(500).json({ success: false });
+        console.error('=== Webhook Error ===');
+        console.error(error);
+        res.status(500).json({ success: false, error: error.message });
     }
 };

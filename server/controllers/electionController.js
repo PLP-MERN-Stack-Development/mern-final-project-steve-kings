@@ -22,7 +22,17 @@ exports.createElection = async (req, res) => {
             organizer: req.user._id,
             thumbnailUrl: thumbnailUrl || '',
             voterLimit: credit.voterLimit, // Store the voter limit from the plan
-            planType: credit.plan // Store which plan was used
+            planType: credit.plan, // Store which plan was used
+            packages: [{
+                packageName: credit.plan,
+                credits: credit.voterLimit,
+                transactionId: credit.transactionId || '',
+                addedDate: new Date()
+            }],
+            // Legacy fields for backward compatibility
+            packageUsed: credit.plan,
+            creditsUsed: credit.voterLimit === -1 ? 999999 : credit.voterLimit,
+            transactionId: credit.transactionId || ''
         });
 
         const createdElection = await election.save();
@@ -157,10 +167,25 @@ exports.vote = async (req, res) => {
             return res.status(404).json({ message: 'Election not found' });
         }
 
-        // Check if election is active
+        // Check if election is active (strict time enforcement)
         const now = new Date();
-        if (now < election.startDate || now > election.endDate) {
-            return res.status(400).json({ message: 'Election is not active' });
+        
+        // Check if election hasn't started yet
+        if (now < new Date(election.startDate)) {
+            return res.status(403).json({ 
+                message: `Voting hasn't started yet. Voting opens on ${new Date(election.startDate).toLocaleString()}`,
+                status: 'upcoming',
+                startDate: election.startDate
+            });
+        }
+        
+        // Check if election has ended
+        if (now > new Date(election.endDate)) {
+            return res.status(403).json({ 
+                message: `Voting has ended. This election closed on ${new Date(election.endDate).toLocaleString()}`,
+                status: 'ended',
+                endDate: election.endDate
+            });
         }
 
         // Check voter limit based on plan
@@ -199,7 +224,7 @@ exports.vote = async (req, res) => {
             return res.status(404).json({ message: 'Candidate not found' });
         }
 
-        // Check if voter has already voted FOR THIS POSITION
+        // Check if voter has already voted for THIS POSITION
         const existingVote = await Vote.findOne({
             election: election._id,
             voterId,
@@ -207,7 +232,9 @@ exports.vote = async (req, res) => {
         });
 
         if (existingVote) {
-            return res.status(400).json({ message: `You have already voted for the position of ${candidate.position}` });
+            return res.status(400).json({ 
+                message: `You have already voted for the position of ${candidate.position}` 
+            });
         }
 
         // Record vote
@@ -225,6 +252,26 @@ exports.vote = async (req, res) => {
         candidate.voteCount += 1;
         await candidate.save();
 
+        // Deduct vote credit from election organizer
+        const User = require('../models/User');
+        const organizer = await User.findById(election.organizer);
+        
+        if (organizer && organizer.voteCredits > 0) {
+            organizer.voteCredits -= 1;
+            await organizer.save();
+            
+            console.log(`✅ Deducted 1 vote credit from ${organizer.username}. Remaining: ${organizer.voteCredits}`);
+            
+            // Emit credit update to organizer's dashboard
+            const io = req.app.get('io');
+            io.to(organizer._id.toString()).emit('credits_updated', {
+                voteCredits: organizer.voteCredits,
+                reason: 'vote_cast',
+                electionId: election._id,
+                electionTitle: election.title
+            });
+        }
+
         // Emit vote update event
         const candidates = await Candidate.find({ election: election._id });
         const totalVotes = await Vote.countDocuments({ election: election._id });
@@ -232,6 +279,14 @@ exports.vote = async (req, res) => {
         const io = req.app.get('io');
         io.to(req.params.id).emit('vote_update', {
             candidates,
+            totalVotes
+        });
+        
+        // Emit newVote event for real-time updates
+        io.emit('newVote', {
+            electionId: election._id,
+            electionTitle: election.title,
+            candidateId: candidate._id,
             totalVotes
         });
 
@@ -310,6 +365,27 @@ exports.checkEligibility = async (req, res) => {
         const { voterId } = req.body;
         const election = await Election.findById(req.params.id);
         if (!election) return res.status(404).json({ message: 'Election not found' });
+
+        // Check if election is active (strict time enforcement)
+        const now = new Date();
+        
+        // Check if election hasn't started yet
+        if (now < new Date(election.startDate)) {
+            return res.status(403).json({ 
+                message: `Voting hasn't started yet. Voting opens on ${new Date(election.startDate).toLocaleString()}`,
+                status: 'upcoming',
+                startDate: election.startDate
+            });
+        }
+        
+        // Check if election has ended
+        if (now > new Date(election.endDate)) {
+            return res.status(403).json({ 
+                message: `Voting has ended. This election closed on ${new Date(election.endDate).toLocaleString()}`,
+                status: 'ended',
+                endDate: election.endDate
+            });
+        }
 
         // Check whitelist
         const allowedVoterCount = await AllowedVoter.countDocuments({ election: election._id });

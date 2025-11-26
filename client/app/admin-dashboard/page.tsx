@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import Link from 'next/link';
+import { io } from 'socket.io-client';
 
 interface User {
     _id: string;
@@ -42,6 +43,30 @@ export default function AdminDashboard() {
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'overview' | 'elections' | 'users'>('overview');
     const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'user' | 'election', id: string } | null>(null);
+    const [selectedElection, setSelectedElection] = useState<string | null>(null);
+    const [electionVotes, setElectionVotes] = useState<any>(null);
+    const [isExporting, setIsExporting] = useState(false);
+
+    const fetchData = async () => {
+        try {
+            setIsLoading(true);
+            // Fetch stats
+            const statsRes = await api.get('/admin/stats');
+            setStats(statsRes.data);
+
+            // Fetch all elections
+            const electionsRes = await api.get('/admin/elections');
+            setElections(electionsRes.data);
+
+            // Fetch all users
+            const usersRes = await api.get('/admin/users');
+            setUsers(usersRes.data);
+        } catch (error) {
+            console.error('Failed to fetch data', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
         if (!authLoading && (!user || user.role !== 'admin')) {
@@ -49,29 +74,39 @@ export default function AdminDashboard() {
             return;
         }
 
-        const fetchData = async () => {
-            try {
-                // Fetch stats
-                const statsRes = await api.get('/admin/stats');
-                setStats(statsRes.data);
-
-                // Fetch all elections
-                const electionsRes = await api.get('/admin/elections');
-                setElections(electionsRes.data);
-
-                // Fetch all users
-                const usersRes = await api.get('/admin/users');
-                setUsers(usersRes.data);
-            } catch (error) {
-                console.error('Failed to fetch data', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         if (user) {
             fetchData();
         }
+
+        // Real-time updates with Socket.IO
+        const socket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000');
+        
+        socket.on('connect', () => {
+            console.log('Admin dashboard connected to real-time updates');
+        });
+
+        socket.on('newVote', () => {
+            console.log('New vote detected, refreshing data...');
+            fetchData();
+        });
+
+        socket.on('newTransaction', () => {
+            console.log('New transaction detected, refreshing data...');
+            fetchData();
+        });
+
+        socket.on('electionUpdated', () => {
+            console.log('Election updated, refreshing data...');
+            fetchData();
+        });
+
+        // Auto-refresh every 30 seconds
+        const interval = setInterval(fetchData, 30000);
+
+        return () => {
+            socket.disconnect();
+            clearInterval(interval);
+        };
     }, [user, authLoading, router]);
 
     const handleDeleteUser = async (userId: string) => {
@@ -104,6 +139,92 @@ export default function AdminDashboard() {
         }
     };
 
+    const handleViewVotes = async (electionId: string) => {
+        try {
+            const response = await api.get(`/admin/elections/${electionId}/votes`);
+            setElectionVotes(response.data);
+            setSelectedElection(electionId);
+        } catch (error: any) {
+            alert('Failed to load votes: ' + (error.response?.data?.message || error.message));
+        }
+    };
+
+    const handleExportElection = async (electionId: string, electionTitle: string) => {
+        try {
+            setIsExporting(true);
+            const response = await api.get(`/admin/elections/${electionId}/export`, {
+                responseType: 'blob'
+            });
+            
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `election-report-${electionTitle.replace(/\s+/g, '-')}-${Date.now()}.xlsx`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            
+            alert('✅ Election report exported successfully!');
+        } catch (error: any) {
+            alert('Failed to export: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
+    const handleExportFinancialReport = async () => {
+        try {
+            setIsExporting(true);
+            const response = await api.get('/admin/reports/financial', {
+                responseType: 'blob'
+            });
+            
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `financial-report-${Date.now()}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            
+            alert('✅ Financial report downloaded successfully!');
+        } catch (error: any) {
+            alert('Failed to export report: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
+    const handleBackupData = async () => {
+        const confirmed = window.confirm(
+            'Download complete system backup?\n\n' +
+            'This will include all users, elections, votes, and transactions.'
+        );
+        
+        if (!confirmed) return;
+
+        try {
+            setIsExporting(true);
+            const response = await api.get('/admin/backup', {
+                responseType: 'blob'
+            });
+            
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `pollsync-backup-${Date.now()}.json`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            
+            alert('✅ System backup downloaded successfully!');
+        } catch (error: any) {
+            alert('Failed to backup data: ' + (error.response?.data?.message || error.message));
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     if (authLoading || !user) {
         return (
             <div className="flex justify-center items-center h-screen bg-gray-50">
@@ -127,6 +248,44 @@ export default function AdminDashboard() {
                             </Link>
                         </div>
                         <div className="flex items-center space-x-4">
+                            <Link
+                                href="/admin/pricing"
+                                className="text-purple-100 hover:text-white transition-colors"
+                                title="Manage Pricing"
+                            >
+                                <i className="fas fa-dollar-sign"></i>
+                            </Link>
+                            <Link
+                                href="/admin/bulk-email"
+                                className="text-purple-100 hover:text-white transition-colors"
+                                title="Send Bulk Email"
+                            >
+                                <i className="fas fa-envelope"></i>
+                            </Link>
+                            <button
+                                onClick={fetchData}
+                                disabled={isLoading}
+                                className="text-purple-100 hover:text-white transition-colors"
+                                title="Refresh Dashboard"
+                            >
+                                <i className={`fas fa-sync-alt ${isLoading ? 'fa-spin' : ''}`}></i>
+                            </button>
+                            <button
+                                onClick={handleExportFinancialReport}
+                                disabled={isExporting}
+                                className="text-purple-100 hover:text-white transition-colors"
+                                title="Export Financial Report"
+                            >
+                                <i className={`fas ${isExporting ? 'fa-spinner fa-spin' : 'fa-file-pdf'}`}></i>
+                            </button>
+                            <button
+                                onClick={handleBackupData}
+                                disabled={isExporting}
+                                className="text-purple-100 hover:text-white transition-colors"
+                                title="Backup System Data"
+                            >
+                                <i className={`fas ${isExporting ? 'fa-spinner fa-spin' : 'fa-download'}`}></i>
+                            </button>
                             <div className="flex items-center space-x-2">
                                 <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold">
                                     {user?.username?.charAt(0).toUpperCase()}
@@ -154,6 +313,23 @@ export default function AdminDashboard() {
             </nav>
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+                {/* New Dashboard Banner */}
+                <div className="mb-6 bg-gradient-to-r from-green-50 to-blue-50 border-l-4 border-green-500 p-4 rounded-lg">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                            <i className="fas fa-chart-line text-green-600 text-2xl"></i>
+                            <div>
+                                <h3 className="font-bold text-gray-900">New Revenue Analytics Dashboard Available!</h3>
+                                <p className="text-sm text-gray-600">View revenue graphs, transaction analytics, and payment management</p>
+                            </div>
+                        </div>
+                        <Link href="/admin" className="btn-primary whitespace-nowrap">
+                            <i className="fas fa-arrow-right mr-2"></i>
+                            View Analytics
+                        </Link>
+                    </div>
+                </div>
+
                 {/* Welcome Section */}
                 <div className="mb-10">
                     <h1 className="text-4xl font-bold text-gray-900">
@@ -329,9 +505,24 @@ export default function AdminDashboard() {
                                                 {new Date(election.startDate).toLocaleDateString()}
                                             </td>
                                             <td className="px-6 py-4 text-right text-sm font-medium space-x-2">
+                                                <button
+                                                    onClick={() => handleViewVotes(election._id)}
+                                                    className="text-blue-600 hover:text-blue-900"
+                                                    title="View Votes"
+                                                >
+                                                    <i className="fas fa-chart-bar"></i>
+                                                </button>
+                                                <button
+                                                    onClick={() => handleExportElection(election._id, election.title)}
+                                                    disabled={isExporting}
+                                                    className="text-green-600 hover:text-green-900 ml-3"
+                                                    title="Export to Excel"
+                                                >
+                                                    <i className={`fas ${isExporting ? 'fa-spinner fa-spin' : 'fa-file-excel'}`}></i>
+                                                </button>
                                                 <Link
                                                     href={`/dashboard/elections/${election._id}`}
-                                                    className="text-purple-600 hover:text-purple-900"
+                                                    className="text-purple-600 hover:text-purple-900 ml-3"
                                                 >
                                                     <i className="fas fa-eye"></i>
                                                 </Link>
@@ -452,6 +643,111 @@ export default function AdminDashboard() {
                             >
                                 Delete
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Election Votes Modal */}
+            {selectedElection && electionVotes && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                        <div className="sticky top-0 bg-white border-b p-6 flex justify-between items-center">
+                            <div>
+                                <h3 className="text-2xl font-bold text-gray-900">{electionVotes.election.title}</h3>
+                                <p className="text-gray-600">Total Votes: {electionVotes.totalVotes}</p>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                                <button
+                                    onClick={() => handleExportElection(selectedElection!, electionVotes.election.title)}
+                                    disabled={isExporting}
+                                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400"
+                                >
+                                    {isExporting ? (
+                                        <><i className="fas fa-spinner fa-spin mr-2"></i>Exporting...</>
+                                    ) : (
+                                        <><i className="fas fa-file-excel mr-2"></i>Export to Excel</>
+                                    )}
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setSelectedElection(null);
+                                        setElectionVotes(null);
+                                    }}
+                                    className="text-gray-500 hover:text-gray-700"
+                                >
+                                    <i className="fas fa-times text-2xl"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="p-6">
+                            {/* Candidates Results */}
+                            <div className="mb-8">
+                                <h4 className="text-lg font-bold text-gray-900 mb-4">Results by Candidate</h4>
+                                <div className="space-y-4">
+                                    {electionVotes.election.candidates
+                                        .sort((a: any, b: any) => b.voteCount - a.voteCount)
+                                        .map((candidate: any, index: number) => {
+                                            const percentage = electionVotes.totalVotes > 0 
+                                                ? ((candidate.voteCount / electionVotes.totalVotes) * 100).toFixed(1)
+                                                : 0;
+                                            return (
+                                                <div key={candidate._id} className="bg-gray-50 rounded-lg p-4">
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <div className="flex items-center space-x-3">
+                                                            <span className="text-2xl font-bold text-gray-400">#{index + 1}</span>
+                                                            <div>
+                                                                <h5 className="font-bold text-gray-900">{candidate.candidate.name}</h5>
+                                                                <p className="text-sm text-gray-600">{candidate.party || 'Independent'}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <div className="text-2xl font-bold text-purple-600">{candidate.voteCount}</div>
+                                                            <div className="text-sm text-gray-600">{percentage}%</div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="w-full bg-gray-200 rounded-full h-3">
+                                                        <div 
+                                                            className="bg-purple-600 h-3 rounded-full transition-all"
+                                                            style={{ width: `${percentage}%` }}
+                                                        ></div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                </div>
+                            </div>
+
+                            {/* Individual Votes */}
+                            <div>
+                                <h4 className="text-lg font-bold text-gray-900 mb-4">Individual Votes</h4>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead className="bg-gray-50">
+                                            <tr>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Voter</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Candidate</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-200">
+                                            {electionVotes.votes.map((vote: any) => (
+                                                <tr key={vote._id} className="hover:bg-gray-50">
+                                                    <td className="px-4 py-3">
+                                                        <div className="text-sm font-medium text-gray-900">{vote.voter?.username || 'Anonymous'}</div>
+                                                        <div className="text-xs text-gray-500">{vote.voter?.email}</div>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-gray-900">{vote.candidate?.name}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-500">
+                                                        {new Date(vote.createdAt).toLocaleString()}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

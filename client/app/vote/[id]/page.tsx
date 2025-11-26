@@ -24,6 +24,9 @@ interface Election {
     endDate: string;
     candidates: Candidate[];
     status: string;
+    contactPerson?: string;
+    contactEmail?: string;
+    contactPhone?: string;
 }
 
 export default function PublicVotingPage({ params }: { params: Promise<{ id: string }> }) {
@@ -216,6 +219,56 @@ export default function PublicVotingPage({ params }: { params: Promise<{ id: str
                         <p className="text-gray-600 max-w-2xl mx-auto">{election.description}</p>
                     </div>
 
+                    {/* Contact Information Card */}
+                    {(election.contactPerson || election.contactEmail || election.contactPhone) && (
+                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl shadow-sm border border-blue-200 p-6 mb-8">
+                            <div className="flex items-center space-x-3 mb-4">
+                                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                                    <i className="fas fa-question-circle text-white"></i>
+                                </div>
+                                <h3 className="text-lg font-bold text-gray-900">Have Questions?</h3>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-4">
+                                If you have any inquiries about this election, feel free to contact us:
+                            </p>
+                            <div className="grid md:grid-cols-3 gap-4">
+                                {election.contactPerson && (
+                                    <div className="bg-white rounded-lg p-4 flex items-center space-x-3">
+                                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <i className="fas fa-user text-blue-600"></i>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-gray-500">Contact Person</p>
+                                            <p className="text-sm font-medium text-gray-900">{election.contactPerson}</p>
+                                        </div>
+                                    </div>
+                                )}
+                                {election.contactEmail && (
+                                    <a href={`mailto:${election.contactEmail}`} className="bg-white rounded-lg p-4 flex items-center space-x-3 hover:shadow-md transition-shadow">
+                                        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <i className="fas fa-envelope text-green-600"></i>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-gray-500">Email</p>
+                                            <p className="text-sm font-medium text-blue-600 hover:underline">{election.contactEmail}</p>
+                                        </div>
+                                    </a>
+                                )}
+                                {election.contactPhone && (
+                                    <a href={`tel:${election.contactPhone}`} className="bg-white rounded-lg p-4 flex items-center space-x-3 hover:shadow-md transition-shadow">
+                                        <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <i className="fas fa-phone text-purple-600"></i>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-gray-500">Phone</p>
+                                            <p className="text-sm font-medium text-blue-600 hover:underline">{election.contactPhone}</p>
+                                        </div>
+                                    </a>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Message */}
                     {message && (
                         <div className={`mb-6 p-4 rounded-lg border flex items-start ${messageType === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
@@ -297,7 +350,17 @@ export default function PublicVotingPage({ params }: { params: Promise<{ id: str
                             )}
 
                             {/* Step 2: Vote */}
-                            {step === 'vote' && (
+                            {step === 'vote' && (!election.candidates || election.candidates.length === 0) && (
+                                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+                                    <div className="w-20 h-20 bg-yellow-50 text-yellow-600 rounded-full mx-auto mb-6 flex items-center justify-center">
+                                        <i className="fas fa-exclamation-triangle text-3xl"></i>
+                                    </div>
+                                    <h2 className="text-2xl font-bold text-gray-900 mb-4">No Candidates Available</h2>
+                                    <p className="text-gray-600">There are no candidates registered for this election yet.</p>
+                                </div>
+                            )}
+
+                            {step === 'vote' && election && election.candidates && election.candidates.length > 0 && (
                                 <div>
                                     <div className="mb-6 text-center">
                                         <h2 className="text-2xl font-bold text-gray-900 mb-2">Select Your Candidates</h2>

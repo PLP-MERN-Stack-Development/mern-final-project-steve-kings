@@ -4,9 +4,9 @@ const User = require('../models/User');
 exports.requireElectionCredit = async (req, res, next) => {
     try {
         console.log('=== Election Credit Check ===');
-        console.log('User ID:', req.user.id);
+        console.log('User ID:', req.user._id || req.user.id);
 
-        const user = await User.findById(req.user.id);
+        const user = await User.findById(req.user._id || req.user.id);
 
         if (!user) {
             console.log('ERROR: User not found');

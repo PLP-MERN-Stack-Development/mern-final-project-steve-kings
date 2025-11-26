@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { createElection, getElections, getElectionById, addCandidate, vote, updateElection, deleteElection, checkEligibility } = require('../controllers/electionController');
+const { addPackageToElection, getElectionPackages } = require('../controllers/electionTopUpController');
 const { protect } = require('../middleware/authMiddleware');
 const { requireElectionCredit } = require('../middleware/electionCreditMiddleware');
 
@@ -20,5 +21,9 @@ router.route('/:id/candidates')
 
 router.post('/:id/vote', vote);
 router.post('/:id/check-eligibility', checkEligibility);
+
+// Package management routes
+router.get('/:id/packages', protect, getElectionPackages);
+router.post('/:id/add-package', protect, addPackageToElection);
 
 module.exports = router;

@@ -1,10 +1,15 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import Link from 'next/link';
 import PricingModal from '@/components/PricingModal';
+
+interface Organization {
+    _id: string;
+    name: string;
+}
 
 export default function CreateElectionPage() {
     const router = useRouter();
@@ -12,14 +17,53 @@ export default function CreateElectionPage() {
     const [showPricingModal, setShowPricingModal] = useState(false);
     const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
     const [thumbnailPreview, setThumbnailPreview] = useState<string>('');
+    const [organizations, setOrganizations] = useState<Organization[]>([]);
+    const [availablePackages, setAvailablePackages] = useState<any[]>([]);
+    const [hasUnusedPackage, setHasUnusedPackage] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
         organization: '',
+        organizationId: '',
         startDate: '',
         endDate: '',
         description: '',
         thumbnailUrl: ''
     });
+
+    useEffect(() => {
+        fetchOrganizations();
+        checkAvailablePackages();
+    }, []);
+
+    const checkAvailablePackages = async () => {
+        try {
+            const res = await api.get('/auth/credits/realtime');
+            // Check for packages not assigned to any election
+            const unused = res.data.electionPackages?.packages?.filter((pkg: any) => !pkg.electionId) || [];
+            setAvailablePackages(unused);
+            setHasUnusedPackage(unused.length > 0);
+        } catch (error) {
+            console.error('Failed to check packages', error);
+        }
+    };
+
+    const fetchOrganizations = async () => {
+        try {
+            const res = await api.get('/organizations');
+            setOrganizations(res.data);
+        } catch (error) {
+            console.error('Failed to fetch organizations', error);
+        }
+    };
+
+    const handleOrganizationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedOrg = organizations.find(org => org._id === e.target.value);
+        setFormData({
+            ...formData,
+            organizationId: e.target.value,
+            organization: selectedOrg?.name || ''
+        });
+    };
 
     const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -31,6 +75,14 @@ export default function CreateElectionPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Check if user has an unused package
+        if (!hasUnusedPackage) {
+            alert('⚠️ You need to purchase a package before creating an election!');
+            setShowPricingModal(true);
+            return;
+        }
+
         setIsLoading(true);
 
         try {
@@ -66,7 +118,8 @@ export default function CreateElectionPage() {
 
     const handlePaymentSuccess = () => {
         setShowPricingModal(false);
-        alert('Payment successful! Your election credit has been added. Please submit the form again.');
+        checkAvailablePackages(); // Refresh package status
+        alert('✅ Payment successful! You can now create your election.');
     };
 
     return (
@@ -80,6 +133,46 @@ export default function CreateElectionPage() {
                     <h1 className="text-3xl font-bold text-gray-900">Create New Election</h1>
                     <p className="text-gray-600 mt-2">Set up the basic details for your election.</p>
                 </div>
+
+                {/* Package Warning */}
+                {!hasUnusedPackage && (
+                    <div className="bg-red-50 border-2 border-red-200 rounded-xl p-6 mb-6">
+                        <div className="flex items-start space-x-4">
+                            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i className="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="text-lg font-bold text-red-900 mb-2">Package Required</h3>
+                                <p className="text-red-700 mb-4">
+                                    You need to purchase a package before creating a new election. Each election requires its own package.
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPricingModal(true)}
+                                    className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium"
+                                >
+                                    <i className="fas fa-shopping-cart mr-2"></i>
+                                    Purchase Package
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Success Message */}
+                {hasUnusedPackage && (
+                    <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 mb-6">
+                        <div className="flex items-center space-x-3">
+                            <i className="fas fa-check-circle text-green-600 text-xl"></i>
+                            <div>
+                                <p className="text-green-800 font-medium">
+                                    ✅ You have {availablePackages.length} unused package{availablePackages.length > 1 ? 's' : ''} available
+                                </p>
+                                <p className="text-sm text-green-700">You can create a new election</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div className="p-8">
@@ -100,16 +193,37 @@ export default function CreateElectionPage() {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-900 mb-2">
-                                    Organization Name <span className="text-red-500">*</span>
+                                    Organization <span className="text-red-500">*</span>
                                 </label>
-                                <input
-                                    type="text"
-                                    required
-                                    className="input-google"
-                                    placeholder="e.g. Computer Science Club"
-                                    value={formData.organization}
-                                    onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
-                                />
+                                {organizations.length > 0 ? (
+                                    <select
+                                        required
+                                        className="input-google"
+                                        value={formData.organizationId}
+                                        onChange={handleOrganizationChange}
+                                    >
+                                        <option value="">Select an organization</option>
+                                        {organizations.map((org) => (
+                                            <option key={org._id} value={org._id}>
+                                                {org.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                ) : (
+                                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                        <p className="text-sm text-yellow-800 mb-2">
+                                            <i className="fas fa-exclamation-triangle mr-2"></i>
+                                            No organizations found. Please create one first.
+                                        </p>
+                                        <Link
+                                            href="/dashboard/organizations"
+                                            className="text-sm text-green-600 hover:underline font-medium"
+                                        >
+                                            <i className="fas fa-plus mr-1"></i>
+                                            Create Organization
+                                        </Link>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="grid md:grid-cols-2 gap-6">

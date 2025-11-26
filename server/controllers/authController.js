@@ -177,3 +177,87 @@ exports.updateProfile = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+// @desc    Get user credit status
+// @route   GET /api/auth/credits
+// @access  Private
+exports.getCreditStatus = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).select('-password');
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const creditSummary = user.getCreditSummary();
+
+        res.json({
+            success: true,
+            user: {
+                id: user._id,
+                username: user.username,
+                email: user.email
+            },
+            electionPackages: creditSummary.electionPackages,
+            availablePackages: creditSummary.packages.available.map(c => ({
+                id: c._id,
+                plan: c.plan,
+                voterLimit: c.voterLimit,
+                price: c.price,
+                transactionId: c.transactionId,
+                purchaseDate: c.purchaseDate,
+                used: c.used
+            })),
+            usedPackages: creditSummary.packages.used.map(c => ({
+                id: c._id,
+                plan: c.plan,
+                voterLimit: c.voterLimit,
+                price: c.price,
+                transactionId: c.transactionId,
+                purchaseDate: c.purchaseDate,
+                used: c.used,
+                electionId: c.electionId
+            })),
+            message: creditSummary.needsPackage 
+                ? 'No election packages available. Please purchase a package to create an election.'
+                : `You have ${creditSummary.electionPackages.available} available package(s).`,
+            topUpUrl: '/pricing'
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            success: false,
+            message: error.message 
+        });
+    }
+};
+
+// @desc    Get real-time credit status
+// @route   GET /api/auth/credits/realtime
+// @access  Private
+exports.getRealtimeCredits = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const creditSummary = user.getCreditSummary();
+
+        res.json({
+            electionPackages: {
+                total: user.electionCredits.length,
+                available: user.electionCredits.filter(c => !c.used).length,
+                used: user.electionCredits.filter(c => c.used).length
+            },
+            availablePackages: creditSummary.packages.available,
+            usedPackages: creditSummary.packages.used,
+            message: creditSummary.needsPackage
+                ? 'No election packages available. Purchase a package to create an election.' 
+                : `You have ${creditSummary.electionPackages.available} available package(s).`
+        });
+    } catch (error) {
+        console.error('Get realtime credits error:', error);
+        res.status(500).json({ message: error.message });
+    }
+};

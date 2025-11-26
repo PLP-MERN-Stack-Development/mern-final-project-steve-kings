@@ -52,9 +52,11 @@ connectDB();
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/elections', require('./routes/elections'));
+app.use('/api/organizations', require('./routes/organizations'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/payment', require('./routes/payment'));
+app.use('/api/pricing', require('./routes/pricing'));
 
 const PORT = process.env.PORT || 5000;
 
