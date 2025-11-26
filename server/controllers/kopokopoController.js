@@ -299,18 +299,49 @@ exports.initiateSTKPush = async (req, res) => {
 
     } catch (error) {
         console.error('=== Kopokopo STK Push Error ===');
+        console.error('Environment:', process.env.NODE_ENV);
+        console.error('Base URL:', BASE_URL);
+        console.error('Callback URL:', CALLBACK_URL);
+        console.error('Has Client ID:', !!CLIENT_ID);
+        console.error('Has Client Secret:', !!CLIENT_SECRET);
+        
         if (error.response) {
             console.error('Status:', error.response.status);
             console.error('Data:', JSON.stringify(error.response.data, null, 2));
             console.error('Headers:', error.response.headers);
+            
+            // Provide more specific error messages
+            let userMessage = 'Failed to initiate payment';
+            if (error.response.status === 401) {
+                userMessage = 'Payment service authentication failed. Please contact support.';
+                console.error('❌ PRODUCTION ERROR: Invalid Kopokopo credentials');
+            } else if (error.response.status === 400) {
+                userMessage = 'Invalid payment request. Please check your phone number and try again.';
+            } else if (error.response.status === 500) {
+                userMessage = 'Payment service temporarily unavailable. Please try again in a few minutes.';
+            }
+            
+            return res.status(500).json({
+                success: false,
+                message: userMessage,
+                error: process.env.NODE_ENV === 'development' ? error.response.data : undefined
+            });
+        } else if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
+            console.error('❌ NETWORK ERROR:', error.code);
+            console.error('Cannot reach Kopokopo API at:', BASE_URL);
+            return res.status(500).json({
+                success: false,
+                message: 'Cannot connect to payment service. Please check your internet connection and try again.'
+            });
         } else {
             console.error('Error:', error.message);
+            console.error('Stack:', error.stack);
         }
 
         res.status(500).json({
             success: false,
-            message: 'Failed to initiate payment',
-            error: error.response ? error.response.data : error.message
+            message: 'Failed to initiate payment. Please try again or contact support.',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
 };

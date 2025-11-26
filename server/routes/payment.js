@@ -210,6 +210,40 @@ router.post('/manual-credit', protect, async (req, res) => {
     }
 });
 
+// Health check endpoint for Kopokopo configuration
+router.get('/kopokopo-health', async (req, res) => {
+    try {
+        const hasClientId = !!process.env.KOPOKOPO_CLIENT_ID && process.env.KOPOKOPO_CLIENT_ID !== 'your_client_id_here';
+        const hasClientSecret = !!process.env.KOPOKOPO_CLIENT_SECRET;
+        const hasCallbackUrl = !!process.env.KOPOKOPO_CALLBACK_URL;
+        const hasTillNumber = !!process.env.KOPOKOPO_TILL_NUMBER;
+        
+        const isConfigured = hasClientId && hasClientSecret && hasCallbackUrl && hasTillNumber;
+        
+        res.json({
+            success: true,
+            configured: isConfigured,
+            testMode: !isConfigured,
+            details: {
+                hasClientId,
+                hasClientSecret,
+                hasCallbackUrl,
+                hasTillNumber,
+                callbackUrl: hasCallbackUrl ? process.env.KOPOKOPO_CALLBACK_URL : 'Not set',
+                baseUrl: process.env.KOPOKOPO_BASE_URL || 'https://api.kopokopo.com'
+            },
+            message: isConfigured 
+                ? 'Kopokopo is properly configured' 
+                : 'Running in TEST MODE - Kopokopo not configured'
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+});
+
 // Check payment status (for frontend polling as fallback)
 router.get('/check-status/:transactionId', protect, async (req, res) => {
     try {

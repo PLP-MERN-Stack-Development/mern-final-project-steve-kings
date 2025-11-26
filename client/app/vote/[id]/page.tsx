@@ -204,8 +204,8 @@ export default function PublicVotingPage({ params }: { params: Promise<{ id: str
                 {/* Main Content */}
                 <main className="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
                     {/* Election Header */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 mb-8 text-center">
-                        <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mb-4 ${isActive ? 'bg-green-100 text-green-800' :
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 md:p-8 mb-6 sm:mb-8 text-center">
+                        <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs sm:text-sm font-medium mb-3 sm:mb-4 ${isActive ? 'bg-green-100 text-green-800' :
                             isUpcoming ? 'bg-blue-100 text-blue-800' :
                                 'bg-gray-100 text-gray-800'
                             }`}>
@@ -215,54 +215,54 @@ export default function PublicVotingPage({ params }: { params: Promise<{ id: str
                                 }`}></span>
                             {isActive ? 'Voting Open' : isUpcoming ? 'Coming Soon' : 'Voting Closed'}
                         </div>
-                        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">{election.title}</h1>
-                        <p className="text-green-600 font-medium text-lg mb-4">{election.organization}</p>
-                        <p className="text-gray-600 max-w-2xl mx-auto">{election.description}</p>
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 px-2">{election.title}</h1>
+                        <p className="text-green-600 font-medium text-base sm:text-lg mb-3 sm:mb-4">{election.organization}</p>
+                        <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto px-2">{election.description}</p>
                     </div>
 
                     {/* Contact Information Card */}
                     {(election.contactPerson || election.contactEmail || election.contactPhone) && (
-                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl shadow-sm border border-blue-200 p-6 mb-8">
-                            <div className="flex items-center space-x-3 mb-4">
-                                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl shadow-sm border border-blue-200 p-4 sm:p-6 mb-6 sm:mb-8">
+                            <div className="flex items-center space-x-3 mb-3 sm:mb-4">
+                                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
                                     <i className="fas fa-question-circle text-white"></i>
                                 </div>
-                                <h3 className="text-lg font-bold text-gray-900">Have Questions?</h3>
+                                <h3 className="text-base sm:text-lg font-bold text-gray-900">Have Questions?</h3>
                             </div>
-                            <p className="text-sm text-gray-600 mb-4">
+                            <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
                                 If you have any inquiries about this election, feel free to contact us:
                             </p>
-                            <div className="grid md:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                                 {election.contactPerson && (
-                                    <div className="bg-white rounded-lg p-4 flex items-center space-x-3">
+                                    <div className="bg-white rounded-lg p-3 sm:p-4 flex items-center space-x-2 sm:space-x-3 min-w-0">
                                         <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                                             <i className="fas fa-user text-blue-600"></i>
                                         </div>
-                                        <div>
+                                        <div className="min-w-0 flex-1">
                                             <p className="text-xs text-gray-500">Contact Person</p>
-                                            <p className="text-sm font-medium text-gray-900">{election.contactPerson}</p>
+                                            <p className="text-sm font-medium text-gray-900 truncate">{election.contactPerson}</p>
                                         </div>
                                     </div>
                                 )}
                                 {election.contactEmail && (
-                                    <a href={`mailto:${election.contactEmail}`} className="bg-white rounded-lg p-4 flex items-center space-x-3 hover:shadow-md transition-shadow">
+                                    <a href={`mailto:${election.contactEmail}`} className="bg-white rounded-lg p-3 sm:p-4 flex items-center space-x-2 sm:space-x-3 hover:shadow-md transition-shadow min-w-0">
                                         <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
                                             <i className="fas fa-envelope text-green-600"></i>
                                         </div>
-                                        <div>
+                                        <div className="min-w-0 flex-1">
                                             <p className="text-xs text-gray-500">Email</p>
-                                            <p className="text-sm font-medium text-blue-600 hover:underline">{election.contactEmail}</p>
+                                            <p className="text-sm font-medium text-blue-600 hover:underline truncate">{election.contactEmail}</p>
                                         </div>
                                     </a>
                                 )}
                                 {election.contactPhone && (
-                                    <a href={`tel:${election.contactPhone}`} className="bg-white rounded-lg p-4 flex items-center space-x-3 hover:shadow-md transition-shadow">
+                                    <a href={`tel:${election.contactPhone}`} className="bg-white rounded-lg p-3 sm:p-4 flex items-center space-x-2 sm:space-x-3 hover:shadow-md transition-shadow min-w-0">
                                         <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
                                             <i className="fas fa-phone text-purple-600"></i>
                                         </div>
-                                        <div>
+                                        <div className="min-w-0 flex-1">
                                             <p className="text-xs text-gray-500">Phone</p>
-                                            <p className="text-sm font-medium text-blue-600 hover:underline">{election.contactPhone}</p>
+                                            <p className="text-sm font-medium text-blue-600 hover:underline truncate">{election.contactPhone}</p>
                                         </div>
                                     </a>
                                 )}
@@ -377,26 +377,26 @@ export default function PublicVotingPage({ params }: { params: Promise<{ id: str
                                             return acc;
                                         }, {} as Record<string, Candidate[]>)).map(([position, candidates]) => (
                                             <div key={position}>
-                                                <h3 className="text-xl font-bold text-gray-800 mb-4 border-b pb-2 border-gray-200 flex justify-between items-center">
-                                                    {position}
+                                                <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4 border-b pb-2 border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                                                    <span>{position}</span>
                                                     {votedPositions.includes(position) && (
-                                                        <span className="text-sm text-green-600 font-medium bg-green-50 px-3 py-1 rounded-full">
+                                                        <span className="text-xs sm:text-sm text-green-600 font-medium bg-green-50 px-2 sm:px-3 py-1 rounded-full whitespace-nowrap">
                                                             <i className="fas fa-check-circle mr-1"></i> Voted
                                                         </span>
                                                     )}
                                                 </h3>
-                                                <div className={`grid md:grid-cols-2 gap-6 ${votedPositions.includes(position) ? 'opacity-50 pointer-events-none' : ''}`}>
+                                                <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 ${votedPositions.includes(position) ? 'opacity-50 pointer-events-none' : ''}`}>
                                                     {candidates.map((candidate) => (
                                                         <div
                                                             key={candidate._id}
                                                             onClick={() => toggleCandidate(position, candidate._id)}
-                                                            className={`bg-white rounded-xl border p-6 cursor-pointer transition-all ${selectedCandidates[position] === candidate._id
+                                                            className={`bg-white rounded-xl border p-4 sm:p-6 cursor-pointer transition-all ${selectedCandidates[position] === candidate._id
                                                                 ? 'border-green-600 ring-2 ring-green-600 ring-opacity-50 shadow-md transform scale-[1.02]'
                                                                 : 'border-gray-200 hover:border-green-400 hover:shadow-md'
                                                                 }`}
                                                         >
-                                                            <div className="flex items-start justify-between mb-4">
-                                                                <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                                                            <div className="flex items-start justify-between mb-3 sm:mb-4">
+                                                                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                                                                     {candidate.photoUrl ? (
                                                                         <img
                                                                             src={candidate.photoUrl.startsWith('http') ? candidate.photoUrl : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000'}/uploads/candidates/${candidate.photoUrl}`}
@@ -405,22 +405,22 @@ export default function PublicVotingPage({ params }: { params: Promise<{ id: str
                                                                         />
                                                                     ) : (
                                                                         <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                                            <i className="fas fa-user text-2xl"></i>
+                                                                            <i className="fas fa-user text-xl sm:text-2xl"></i>
                                                                         </div>
                                                                     )}
                                                                 </div>
                                                                 {selectedCandidates[position] === candidate._id && (
-                                                                    <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center flex-shrink-0">
-                                                                        <i className="fas fa-check"></i>
+                                                                    <div className="w-7 h-7 sm:w-8 sm:h-8 bg-green-600 text-white rounded-full flex items-center justify-center flex-shrink-0">
+                                                                        <i className="fas fa-check text-sm"></i>
                                                                     </div>
                                                                 )}
                                                             </div>
-                                                            <h3 className="text-xl font-bold text-gray-900 mb-1">{candidate.name}</h3>
-                                                            <div className="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-2 py-1 rounded mb-3">
+                                                            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 break-words">{candidate.name}</h3>
+                                                            <div className="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-2 py-1 rounded mb-2 sm:mb-3">
                                                                 {candidate.position}
                                                             </div>
                                                             {candidate.manifesto && (
-                                                                <p className="text-gray-600 text-sm line-clamp-3">{candidate.manifesto}</p>
+                                                                <p className="text-gray-600 text-xs sm:text-sm line-clamp-3 break-words">{candidate.manifesto}</p>
                                                             )}
                                                         </div>
                                                     ))}
@@ -429,21 +429,21 @@ export default function PublicVotingPage({ params }: { params: Promise<{ id: str
                                         ))}
                                     </div>
 
-                                    <div className="flex gap-4 max-w-2xl mx-auto">
+                                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-2xl mx-auto">
                                         <button
                                             onClick={() => setStep('verify')}
-                                            className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all"
+                                            className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all text-sm sm:text-base"
                                         >
                                             Back
                                         </button>
                                         <button
                                             onClick={handleVote}
                                             disabled={Object.keys(selectedCandidates).length === 0 || isSubmitting}
-                                            className="flex-1 btn-primary text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="flex-1 btn-primary text-base sm:text-lg py-2.5 sm:py-3 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             {isSubmitting ? (
                                                 <span className="flex items-center justify-center">
-                                                    <div className="spinner-google w-5 h-5 mr-2 border-white border-t-transparent"></div>
+                                                    <div className="spinner-google w-4 h-4 sm:w-5 sm:h-5 mr-2 border-white border-t-transparent"></div>
                                                     Submitting...
                                                 </span>
                                             ) : 'Cast Votes'}
