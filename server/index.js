@@ -97,7 +97,8 @@ app.get('/', (req, res) => {
         status: 'ok', 
         message: 'PollSync API is running',
         environment: process.env.NODE_ENV || 'development',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        version: '1.0.1'
     });
 });
 
@@ -106,6 +107,29 @@ app.get('/api/health', (req, res) => {
         status: 'healthy', 
         uptime: process.uptime(),
         timestamp: new Date().toISOString()
+    });
+});
+
+// Test endpoint to verify routes are loaded
+app.get('/api/routes-test', (req, res) => {
+    res.json({
+        success: true,
+        message: 'Routes are properly loaded',
+        availableRoutes: {
+            auth: '/api/auth/*',
+            elections: '/api/elections/*',
+            organizations: '/api/organizations/*',
+            payment: '/api/payment/* (including /callback)',
+            pricing: '/api/pricing/*',
+            admin: '/api/admin/*'
+        },
+        paymentRoutes: {
+            stkPush: 'POST /api/payment/stk-push',
+            callback: 'POST /api/payment/callback',
+            checkStatus: 'GET /api/payment/check-status/:transactionId',
+            verifyTransaction: 'POST /api/payment/verify-transaction',
+            kopokopoHealth: 'GET /api/payment/kopokopo-health'
+        }
     });
 });
 
