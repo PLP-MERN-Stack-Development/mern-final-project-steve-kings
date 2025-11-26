@@ -2,8 +2,125 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import MobileMenu from '@/components/MobileMenu';
+
+// Testimonials data
+const testimonials = [
+    {
+        quote: "PollSync transformed our university elections! The platform is incredibly intuitive, and students loved voting from their phones. Our turnout skyrocketed from 45% to 92%!",
+        name: "Agnes",
+        role: "Nature Club",
+        image: "/testimonials/happy.jpg"
+    },
+    {
+        quote: "Running our club elections has never been easier. The real-time results feature saved us hours of manual counting. Absolutely game-changing!",
+        name: "Mannuh",
+        role: "Journalism Club",
+        image: "/testimonials/happy.jpg"
+    },
+    {
+        quote: "Security was our biggest concern, but PollSync exceeded all expectations. The unique voter ID system ensured complete transparency and trust.",
+        name: "Pierra",
+        role: "Christian Union",
+        image: "/testimonials/happy.jpg"
+    },
+    {
+        quote: "We managed 5,000+ voters seamlessly! The CSV upload feature and automated voter ID generation made setup incredibly fast. Highly recommend!",
+        name: "Kidiki",
+        role: "Drama Club",
+        image: "/testimonials/happy.jpg"
+    },
+    {
+        quote: "The mobile experience is flawless. Students could vote during breaks, between classes, anywhere. This is the future of student elections!",
+        name: "Grace N.",
+        role: "Debate Society",
+        image: "/testimonials/happy.jpg"
+    }
+];
+
+function TestimonialsSlider() {
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+        }, 5000); // Change every 5 seconds
+
+        return () => clearInterval(interval);
+    }, []);
+
+    const goToSlide = (index: number) => {
+        setCurrentIndex(index);
+    };
+
+    return (
+        <section className="py-16 sm:py-20 md:py-24 bg-green-900 text-white overflow-hidden relative">
+            <div className="absolute top-0 left-0 w-full h-full opacity-10">
+                <div className="absolute right-0 top-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+                <div className="absolute left-0 bottom-0 w-96 h-96 bg-orange-500 rounded-full blur-3xl"></div>
+            </div>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div className="text-center max-w-4xl mx-auto">
+                    <div className="text-6xl text-green-400 mb-8 opacity-50">
+                        <i className="fas fa-quote-left"></i>
+                    </div>
+                    
+                    {/* Testimonial Content */}
+                    <div className="relative min-h-[300px] flex items-center justify-center">
+                        {testimonials.map((testimonial, index) => (
+                            <div
+                                key={index}
+                                className={`absolute inset-0 transition-all duration-700 ${
+                                    index === currentIndex 
+                                        ? 'opacity-100 translate-x-0' 
+                                        : index < currentIndex 
+                                        ? 'opacity-0 -translate-x-full' 
+                                        : 'opacity-0 translate-x-full'
+                                }`}
+                            >
+                                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-8 leading-tight px-4">
+                                    "{testimonial.quote}"
+                                </h2>
+                                <div className="flex items-center justify-center gap-4">
+                                    <div className="w-16 h-16 rounded-full border-2 border-green-400 overflow-hidden">
+                                        <Image
+                                            src={testimonial.image}
+                                            width={64}
+                                            height={64}
+                                            alt={testimonial.name}
+                                        />
+                                    </div>
+                                    <div className="text-left">
+                                        <div className="font-bold text-xl">{testimonial.name}</div>
+                                        <div className="text-green-300">{testimonial.role}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Dots Navigation */}
+                    <div className="flex justify-center gap-2 mt-8">
+                        {testimonials.map((_, index) => (
+                            <button
+                                key={index}
+                                onClick={() => goToSlide(index)}
+                                className={`w-3 h-3 rounded-full transition-all ${
+                                    index === currentIndex 
+                                        ? 'bg-white w-8' 
+                                        : 'bg-white/40 hover:bg-white/60'
+                                }`}
+                                aria-label={`Go to testimonial ${index + 1}`}
+                            />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+}
 
 export default function HomePage() {
     useEffect(() => {
@@ -75,13 +192,13 @@ export default function HomePage() {
                     <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
                         <div className="fade-in">
                             <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight tracking-tight">
-                                Digital Elections <br />
+                                Transform Your Elections <br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-green-400">
-                                    Made Simple
+                                    Into Digital Success
                                 </span>
                             </h1>
                             <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8 leading-relaxed">
-                                Run secure, transparent elections with M-Pesa integration. Perfect for universities, student councils, clubs, organizations, and communities.
+                                The complete platform for running secure, transparent online elections. Built for universities, student councils, clubs, organizations, and communities across Africa.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                                 <Link href="/pricing" className="btn-primary text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all text-center">
@@ -96,7 +213,7 @@ export default function HomePage() {
                                 <div className="flex -space-x-2">
                                     {[1, 2, 3, 4].map(i => (
                                         <div key={i} className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center overflow-hidden">
-                                            <Image src={`https://i.pravatar.cc/100?img=${i + 10}`} width={32} height={32} alt="User" />
+                                            <Image src={`/images/img${i}.png`} width={32} height={32} alt="Organization" />
                                         </div>
                                     ))}
                                 </div>
@@ -105,7 +222,7 @@ export default function HomePage() {
                         </div>
                         <div className="relative h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] rounded-2xl overflow-hidden shadow-2xl scale-in border-4 sm:border-8 border-white/50 backdrop-blur-sm">
                             <Image
-                                src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"
+                                src="/images/img1.png"
                                 alt="PollSync Dashboard Interface"
                                 fill
                                 className="object-cover"
@@ -145,26 +262,26 @@ export default function HomePage() {
                         {[
                             {
                                 step: '01',
-                                title: 'Purchase Package',
-                                desc: 'Pay via M-Pesa for your voter capacity. Packages start from KES 5.',
-                                icon: 'fa-credit-card'
+                                title: 'Choose Your Plan',
+                                desc: 'Select the perfect package for your voter capacity. Flexible pricing that grows with you.',
+                                icon: 'fa-box'
                             },
                             {
                                 step: '02',
-                                title: 'Create Election',
-                                desc: 'Set up election details, add candidates with photos and manifestos.',
+                                title: 'Build Your Election',
+                                desc: 'Create positions, add candidates with photos and manifestos. Our intuitive builder makes it effortless.',
                                 icon: 'fa-edit'
                             },
                             {
                                 step: '03',
-                                title: 'Share & Vote',
-                                desc: 'Send secure links to voters. They vote from any device, anywhere.',
+                                title: 'Engage Voters',
+                                desc: 'Share secure voting links via email, SMS, or social media. Voters participate from anywhere, anytime.',
                                 icon: 'fa-share-alt'
                             },
                             {
                                 step: '04',
-                                title: 'Real-Time Results',
-                                desc: 'Watch votes come in live. Instant results when polls close.',
+                                title: 'Instant Analytics',
+                                desc: 'Track turnout in real-time. Get comprehensive results the moment polls close.',
                                 icon: 'fa-chart-pie'
                             }
                         ].map((item, index) => (
@@ -192,7 +309,7 @@ export default function HomePage() {
                         <div className="order-2 md:order-1 relative h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] slide-in-left">
                             <div className="absolute inset-0 bg-gradient-to-tr from-green-100 to-orange-100 rounded-3xl transform -rotate-3"></div>
                             <Image
-                                src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80"
+                                src="/images/img2.png"
                                 alt="Real-time Analytics"
                                 fill
                                 className="object-cover rounded-3xl shadow-2xl transform rotate-3 hover:rotate-0 transition-all duration-500"
@@ -200,31 +317,31 @@ export default function HomePage() {
                         </div>
                         <div className="order-1 md:order-2 fade-in">
                             <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                                Everything You Need, <br />
-                                <span className="text-green-600">Powered by M-Pesa</span>
+                                Everything You Need <br />
+                                <span className="text-green-600">For Flawless Elections</span>
                             </h2>
 
                             <div className="space-y-8">
                                 {[
                                     {
-                                        title: 'M-Pesa Integration',
-                                        desc: 'Pay securely with M-Pesa. Instant package activation. No credit cards needed.',
-                                        icon: 'fa-mobile-alt'
-                                    },
-                                    {
-                                        title: 'Package-Based Pricing',
-                                        desc: 'Pay only for what you need. From KES 5 for 10 voters to unlimited packages.',
-                                        icon: 'fa-box'
-                                    },
-                                    {
-                                        title: 'Secure & Transparent',
-                                        desc: 'Unique voter IDs, one vote per person, encrypted data, and real-time monitoring.',
+                                        title: 'Enterprise Security',
+                                        desc: 'Bank-grade encryption, unique voter authentication, and fraud prevention. Your elections are protected 24/7.',
                                         icon: 'fa-shield-alt'
                                     },
                                     {
-                                        title: 'Works Everywhere',
-                                        desc: 'Mobile-first design. Works on any phone, tablet, or computer with internet.',
+                                        title: 'Real-Time Intelligence',
+                                        desc: 'Live turnout tracking, instant vote counting, and comprehensive analytics. Make data-driven decisions.',
+                                        icon: 'fa-chart-line'
+                                    },
+                                    {
+                                        title: 'Universal Access',
+                                        desc: 'Mobile-first design that works flawlessly on any device. Voters participate from anywhere, anytime.',
                                         icon: 'fa-globe'
+                                    },
+                                    {
+                                        title: 'Flexible Scaling',
+                                        desc: 'From 10 to 10,000+ voters. Our platform grows with your needs. Pay only for what you use.',
+                                        icon: 'fa-rocket'
                                     }
                                 ].map((feature, i) => (
                                     <div key={i} className="flex gap-4">
@@ -243,38 +360,8 @@ export default function HomePage() {
                 </div>
             </section>
 
-            {/* Testimonials */}
-            <section className="py-16 sm:py-20 md:py-24 bg-green-900 text-white overflow-hidden relative">
-                <div className="absolute top-0 left-0 w-full h-full opacity-10">
-                    <div className="absolute right-0 top-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-                    <div className="absolute left-0 bottom-0 w-96 h-96 bg-orange-500 rounded-full blur-3xl"></div>
-                </div>
-
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                    <div className="text-center max-w-4xl mx-auto fade-in">
-                        <div className="text-6xl text-green-400 mb-8 opacity-50">
-                            <i className="fas fa-quote-left"></i>
-                        </div>
-                        <h2 className="text-3xl md:text-5xl font-bold mb-8 leading-tight">
-                            "PollSync made our university elections incredibly easy! M-Pesa payment was instant, and students could vote from their phones. Turnout increased from 45% to 92%!"
-                        </h2>
-                        <div className="flex items-center justify-center gap-4">
-                            <div className="w-16 h-16 rounded-full border-2 border-green-400 overflow-hidden">
-                                <Image
-                                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80"
-                                    width={64}
-                                    height={64}
-                                    alt="Student Leader"
-                                />
-                            </div>
-                            <div className="text-left">
-                                <div className="font-bold text-xl">Sarah M.</div>
-                                <div className="text-green-300">Student Council President</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            {/* Testimonials Slider */}
+            <TestimonialsSlider />
 
             {/* CTA */}
             <section className="py-16 sm:py-20 md:py-24 bg-white">
@@ -284,10 +371,10 @@ export default function HomePage() {
                         <div className="absolute bottom-0 left-0 w-64 h-64 bg-orange-500 opacity-20 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
 
                         <h2 className="text-4xl md:text-6xl font-bold mb-6 relative z-10">
-                            Ready to Run Your Election?
+                            Ready to Revolutionize Your Elections?
                         </h2>
                         <p className="text-xl text-green-50 mb-10 max-w-2xl mx-auto relative z-10">
-                            Join hundreds of universities, student councils, and organizations running secure, transparent elections. Start from just KES 5.
+                            Join hundreds of universities, student councils, and organizations running secure, transparent elections with confidence. Get started in minutes.
                         </p>
                         <div className="relative z-10">
                             <Link href="/pricing" className="bg-white text-green-600 hover:bg-gray-50 px-10 py-5 rounded-full font-bold text-xl transition-all shadow-lg hover:shadow-xl hover:scale-105 inline-flex items-center gap-2">
@@ -295,7 +382,7 @@ export default function HomePage() {
                                 <i className="fas fa-arrow-right"></i>
                             </Link>
                             <p className="mt-4 text-sm text-green-100 opacity-80">
-                                No credit card required • Cancel anytime
+                                Instant setup • Secure payments • 24/7 support
                             </p>
                         </div>
                     </div>
@@ -362,7 +449,7 @@ export default function HomePage() {
 
                     <div className="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center">
                         <p className="text-gray-500 text-sm mb-4 md:mb-0">
-                            &copy; 2025 PollSync. Powered by M-Pesa
+                            &copy; 2025 PollSync. Empowering Democratic Decisions Across Africa
                         </p>
                         <div className="flex space-x-8 text-sm text-gray-500">
                             <Link href="#" className="hover:text-green-600">Privacy Policy</Link>

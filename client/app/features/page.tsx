@@ -69,11 +69,11 @@ export default function FeaturesPage() {
                 <div className="container-google">
                     <div className="max-w-4xl mx-auto text-center fade-in">
                         <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-                            Powerful Features for <span className="text-green-600">Modern Elections</span>
+                            Built for <span className="text-green-600">Election Excellence</span>
                         </h1>
                         <p className="text-xl text-gray-600 mb-8">
-                            Everything you need to run secure, transparent, and efficient online elections. 
-                            No technical expertise required.
+                            A comprehensive suite of tools designed to make your elections seamless, secure, and successful. 
+                            Professional results without the complexity.
                         </p>
                     </div>
                 </div>
@@ -91,11 +91,11 @@ export default function FeaturesPage() {
                                 </span>
                             </div>
                             <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                                Manage Voters with Ease
+                                Effortless Voter Management
                             </h2>
                             <p className="text-lg text-gray-600 mb-6">
-                                Add and manage your voter list efficiently. Whether you have 50 or 5,000 voters, 
-                                PollSync makes it simple.
+                                Scale from 50 to 50,000 voters without breaking a sweat. Our intelligent system 
+                                handles the complexity so you can focus on running a great election.
                             </p>
                             <div className="space-y-4">
                                 <div className="card-google p-4">
@@ -123,7 +123,7 @@ export default function FeaturesPage() {
                         </div>
                         <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl slide-in-right">
                             <Image
-                                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80"
+                                src="/images/img2.png"
                                 alt="Team collaboration"
                                 fill
                                 className="object-cover"
@@ -139,7 +139,7 @@ export default function FeaturesPage() {
                     <div className="grid md:grid-cols-2 gap-12 items-center">
                         <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl slide-in-left order-2 md:order-1">
                             <Image
-                                src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80"
+                                src="/images/img3.png"
                                 alt="Security lock"
                                 fill
                                 className="object-cover"
@@ -153,10 +153,11 @@ export default function FeaturesPage() {
                                 </span>
                             </div>
                             <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                                Enterprise-Grade Security
+                                Military-Grade Security
                             </h2>
                             <p className="text-lg text-gray-600 mb-6">
-                                Your elections are protected by the same security standards used by banks and financial institutions.
+                                Sleep soundly knowing your elections are protected by enterprise-level security. 
+                                We use the same encryption standards trusted by global financial institutions.
                             </p>
                             <div className="space-y-4">
                                 <div className="card-google p-4">
@@ -198,10 +199,11 @@ export default function FeaturesPage() {
                                 </span>
                             </div>
                             <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                                Real-time Results & Analytics
+                                Intelligence at Your Fingertips
                             </h2>
                             <p className="text-lg text-gray-600 mb-6">
-                                Monitor your election in real-time and get instant results when polls close. No manual counting needed.
+                                Transform raw votes into actionable insights. Our real-time analytics dashboard 
+                                gives you complete visibility into every aspect of your election.
                             </p>
                             <div className="space-y-4">
                                 <div className="card-google p-4">
@@ -229,7 +231,7 @@ export default function FeaturesPage() {
                         </div>
                         <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl slide-in-right">
                             <Image
-                                src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80"
+                                src="/images/img4.png"
                                 alt="Analytics dashboard"
                                 fill
                                 className="object-cover"
@@ -244,10 +246,10 @@ export default function FeaturesPage() {
                 <div className="container-google">
                     <div className="text-center mb-16 fade-in">
                         <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                            More Powerful Features
+                            Even More to Love
                         </h2>
                         <p className="text-xl text-gray-600">
-                            Everything you need for successful elections
+                            Discover the features that make PollSync the complete election solution
                         </p>
                     </div>
                     <div className="grid md:grid-cols-3 gap-8">
@@ -255,43 +257,43 @@ export default function FeaturesPage() {
                             <div className="w-16 h-16 bg-green-600 rounded-xl flex items-center justify-center mx-auto mb-4">
                                 <i className="fas fa-image text-white text-2xl"></i>
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-3">Candidate Photos</h3>
-                            <p className="text-gray-600">Upload photos for each candidate to help voters make informed decisions. Supports multiple image formats.</p>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Rich Candidate Profiles</h3>
+                            <p className="text-gray-600">Showcase candidates with photos, manifestos, and bios. Help voters make informed decisions with comprehensive profiles.</p>
                         </div>
                         <div className="card-google p-8 text-center scale-in" style={{transitionDelay: '0.1s'}}>
                             <div className="w-16 h-16 bg-green-600 rounded-xl flex items-center justify-center mx-auto mb-4">
                                 <i className="fas fa-share-nodes text-white text-2xl"></i>
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-3">Easy Sharing</h3>
-                            <p className="text-gray-600">Generate shareable voting links. Share via email, SMS, WhatsApp, or social media with one click.</p>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Viral-Ready Sharing</h3>
+                            <p className="text-gray-600">One-click sharing to email, SMS, WhatsApp, and social media. Maximize voter turnout with effortless distribution.</p>
                         </div>
                         <div className="card-google p-8 text-center scale-in" style={{transitionDelay: '0.2s'}}>
                             <div className="w-16 h-16 bg-green-600 rounded-xl flex items-center justify-center mx-auto mb-4">
                                 <i className="fas fa-mobile-alt text-white text-2xl"></i>
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-3">Mobile Friendly</h3>
-                            <p className="text-gray-600">Works perfectly on phones, tablets, and computers. Voters can participate from any device.</p>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Device Agnostic</h3>
+                            <p className="text-gray-600">Flawless experience on every screen size. From smartphones to desktops, your voters get a perfect interface.</p>
                         </div>
                         <div className="card-google p-8 text-center scale-in" style={{transitionDelay: '0.3s'}}>
                             <div className="w-16 h-16 bg-green-600 rounded-xl flex items-center justify-center mx-auto mb-4">
                                 <i className="fas fa-calendar-alt text-white text-2xl"></i>
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-3">Schedule Elections</h3>
-                            <p className="text-gray-600">Set start and end dates for your elections. Polls automatically open and close at scheduled times.</p>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Smart Scheduling</h3>
+                            <p className="text-gray-600">Set it and forget it. Polls automatically open and close at your scheduled times. No manual intervention needed.</p>
                         </div>
                         <div className="card-google p-8 text-center scale-in" style={{transitionDelay: '0.4s'}}>
                             <div className="w-16 h-16 bg-green-600 rounded-xl flex items-center justify-center mx-auto mb-4">
                                 <i className="fas fa-list-check text-white text-2xl"></i>
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-3">Multiple Positions</h3>
-                            <p className="text-gray-600">Create elections with multiple positions. Voters can vote for President, Secretary, Treasurer, and more in one ballot.</p>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Complex Ballots Made Simple</h3>
+                            <p className="text-gray-600">Run multi-position elections effortlessly. From President to Treasurer, handle unlimited positions in a single, elegant ballot.</p>
                         </div>
                         <div className="card-google p-8 text-center scale-in" style={{transitionDelay: '0.5s'}}>
                             <div className="w-16 h-16 bg-green-600 rounded-xl flex items-center justify-center mx-auto mb-4">
                                 <i className="fas fa-headset text-white text-2xl"></i>
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-3">Email Support</h3>
-                            <p className="text-gray-600">Get help when you need it. Our support team is ready to assist you with any questions.</p>
+                            <h3 className="text-xl font-bold text-gray-900 mb-3">Human Support</h3>
+                            <p className="text-gray-600">Real people, real help. Our dedicated support team is here to ensure your election runs smoothly from start to finish.</p>
                         </div>
                     </div>
                 </div>
@@ -302,10 +304,10 @@ export default function FeaturesPage() {
                 <div className="container-google">
                     <div className="max-w-4xl mx-auto text-center fade-in">
                         <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                            Ready to experience these features?
+                            Experience the Difference
                         </h2>
                         <p className="text-xl text-green-50 mb-8">
-                            Create your first election and see how easy it is
+                            See why organizations choose PollSync for their most important elections
                         </p>
                         <div className="flex flex-wrap gap-4 justify-center">
                             <Link href="/register" className="bg-white text-green-600 hover:bg-gray-100 px-8 py-4 rounded-lg font-bold text-lg transition-all shadow-lg hover:shadow-xl hover:scale-105">

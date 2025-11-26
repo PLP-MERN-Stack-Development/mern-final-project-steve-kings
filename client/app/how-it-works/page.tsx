@@ -69,11 +69,11 @@ export default function HowItWorksPage() {
                 <div className="container-google">
                     <div className="max-w-4xl mx-auto text-center fade-in">
                         <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-                            How <span className="text-green-600">PollSync</span> Works
+                            From Setup to Results in <span className="text-green-600">Four Simple Steps</span>
                         </h1>
                         <p className="text-xl text-gray-600 mb-8">
-                            Create and manage secure online elections in just a few simple steps. 
-                            No technical expertise required.
+                            Launch professional elections in minutes, not days. Our intuitive platform guides you 
+                            through every step—no technical skills needed.
                         </p>
                     </div>
                 </div>
@@ -90,11 +90,11 @@ export default function HowItWorksPage() {
                                 </span>
                             </div>
                             <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                                Create Your Election
+                                Design Your Perfect Election
                             </h2>
                             <p className="text-lg text-gray-600 mb-6">
-                                Start by setting up your election with just a few clicks. Our intuitive interface 
-                                guides you through the process.
+                                Our smart election builder walks you through every detail. From basic info to 
+                                candidate profiles, create a professional election in minutes.
                             </p>
                             <div className="space-y-4">
                                 <div className="flex items-start">
@@ -128,7 +128,7 @@ export default function HowItWorksPage() {
                         </div>
                         <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl slide-in-right">
                             <Image
-                                src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80"
+                                src="/images/img3.png"
                                 alt="Creating election dashboard"
                                 fill
                                 className="object-cover"
@@ -144,7 +144,7 @@ export default function HowItWorksPage() {
                     <div className="grid md:grid-cols-2 gap-12 items-center">
                         <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl slide-in-left order-2 md:order-1">
                             <Image
-                                src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"
+                                src="/images/img4.png"
                                 alt="CSV file upload"
                                 fill
                                 className="object-cover"
@@ -157,10 +157,11 @@ export default function HowItWorksPage() {
                                 </span>
                             </div>
                             <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                                Add Voters
+                                Import Your Voters Instantly
                             </h2>
                             <p className="text-lg text-gray-600 mb-6">
-                                Import your voter list quickly and easily. Each voter receives a unique ID for secure authentication.
+                                Upload thousands of voters in seconds with our smart CSV importer. Each voter gets 
+                                a unique, secure ID automatically—no manual work required.
                             </p>
                             <div className="space-y-4">
                                 <div className="flex items-start">
@@ -207,10 +208,11 @@ export default function HowItWorksPage() {
                                 </span>
                             </div>
                             <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                                Share & Vote
+                                Launch & Watch Engagement Soar
                             </h2>
                             <p className="text-lg text-gray-600 mb-6">
-                                Share the voting link with your voters and let them cast their ballots securely from anywhere.
+                                One click to share your election everywhere. Voters access a beautiful, intuitive 
+                                ballot from any device. Watch participation rates climb in real-time.
                             </p>
                             <div className="space-y-4">
                                 <div className="flex items-start">
@@ -244,7 +246,7 @@ export default function HowItWorksPage() {
                         </div>
                         <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl slide-in-right">
                             <Image
-                                src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80"
+                                src="/images/img5.png"
                                 alt="People sharing and voting"
                                 fill
                                 className="object-cover"
@@ -260,7 +262,7 @@ export default function HowItWorksPage() {
                     <div className="grid md:grid-cols-2 gap-12 items-center">
                         <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl slide-in-left order-2 md:order-1">
                             <Image
-                                src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80"
+                                src="/images/img1.png"
                                 alt="Analytics dashboard"
                                 fill
                                 className="object-cover"
@@ -273,10 +275,11 @@ export default function HowItWorksPage() {
                                 </span>
                             </div>
                             <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                                View Results Instantly
+                                Celebrate Instant Results
                             </h2>
                             <p className="text-lg text-gray-600 mb-6">
-                                Get real-time vote counts and instant results when polls close. No manual counting required.
+                                The moment polls close, results appear automatically. No waiting, no manual counting, 
+                                no errors. Just accurate, instant results you can trust.
                             </p>
                             <div className="space-y-4">
                                 <div className="flex items-start">
@@ -317,10 +320,10 @@ export default function HowItWorksPage() {
                 <div className="container-google">
                     <div className="max-w-4xl mx-auto text-center fade-in">
                         <h2 className="text-4xl font-bold mb-6">
-                            Built with Security in Mind
+                            Security That Never Sleeps
                         </h2>
                         <p className="text-xl text-green-50 mb-12">
-                            Your elections are protected by enterprise-grade security features
+                            Every vote protected by multiple layers of enterprise-grade security
                         </p>
                         <div className="grid md:grid-cols-3 gap-8">
                             <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl">
@@ -348,10 +351,10 @@ export default function HowItWorksPage() {
                 <div className="container-google">
                     <div className="max-w-4xl mx-auto text-center fade-in">
                         <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                            Ready to get started?
+                            Your Next Election Starts Here
                         </h2>
                         <p className="text-xl text-gray-600 mb-8">
-                            Create your first election in minutes. No credit card required.
+                            Join the digital election revolution. Set up your first election in under 10 minutes.
                         </p>
                         <div className="flex flex-wrap gap-4 justify-center">
                             <Link href="/register" className="btn-primary text-lg px-8 py-4">
