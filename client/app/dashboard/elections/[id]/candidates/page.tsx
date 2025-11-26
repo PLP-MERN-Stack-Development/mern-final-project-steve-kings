@@ -152,7 +152,7 @@ export default function AddCandidatesPage() {
                                         {newCandidate.photoUrl && (
                                             <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
                                                 <img
-                                                    src={`http://localhost:5000/uploads/candidates/${newCandidate.photoUrl}`}
+                                                    src={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000'}/uploads/candidates/${newCandidate.photoUrl}`}
                                                     alt="Preview"
                                                     className="w-full h-full object-cover"
                                                 />
@@ -197,7 +197,7 @@ export default function AddCandidatesPage() {
                                         <div className="w-24 h-24 bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden">
                                             {candidate.photoUrl ? (
                                                 <img
-                                                    src={candidate.photoUrl.startsWith('http') ? candidate.photoUrl : `http://localhost:5000/uploads/candidates/${candidate.photoUrl}`}
+                                                    src={candidate.photoUrl.startsWith('http') ? candidate.photoUrl : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000'}/uploads/candidates/${candidate.photoUrl}`}
                                                     alt={candidate.name}
                                                     className="w-full h-full object-cover"
                                                 />

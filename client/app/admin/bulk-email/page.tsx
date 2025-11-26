@@ -21,7 +21,8 @@ export default function BulkEmailPage() {
     const fetchEmailStats = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/admin/email-stats', {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+            const response = await fetch(`${API_URL}/admin/email-stats`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -53,7 +54,8 @@ export default function BulkEmailPage() {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/admin/send-bulk-email', {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+            const response = await fetch(`${API_URL}/admin/send-bulk-email`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

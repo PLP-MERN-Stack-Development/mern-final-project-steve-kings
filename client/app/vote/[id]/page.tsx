@@ -399,7 +399,7 @@ export default function PublicVotingPage({ params }: { params: Promise<{ id: str
                                                                 <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                                                                     {candidate.photoUrl ? (
                                                                         <img
-                                                                            src={candidate.photoUrl.startsWith('http') ? candidate.photoUrl : `http://localhost:5000/uploads/candidates/${candidate.photoUrl}`}
+                                                                            src={candidate.photoUrl.startsWith('http') ? candidate.photoUrl : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000'}/uploads/candidates/${candidate.photoUrl}`}
                                                                             alt={candidate.name}
                                                                             className="w-full h-full object-cover"
                                                                         />

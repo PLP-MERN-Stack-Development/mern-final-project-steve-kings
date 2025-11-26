@@ -562,7 +562,7 @@ function ElectionDetailsContent({ id }: { id: string }) {
                                                     <div className="w-16 h-16 rounded-full bg-gray-100 overflow-hidden">
                                                         {candidate.photoUrl ? (
                                                             <img
-                                                                src={candidate.photoUrl.startsWith('http') ? candidate.photoUrl : `http://localhost:5000/uploads/candidates/${candidate.photoUrl}`}
+                                                                src={candidate.photoUrl.startsWith('http') ? candidate.photoUrl : `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000'}/uploads/candidates/${candidate.photoUrl}`}
                                                                 alt={candidate.name}
                                                                 className="w-full h-full object-cover"
                                                             />

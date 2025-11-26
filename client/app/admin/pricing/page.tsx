@@ -29,7 +29,8 @@ export default function AdminPricingPage() {
     const fetchPlans = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/admin/pricing', {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+            const response = await fetch(`${API_URL}/admin/pricing`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -56,7 +57,8 @@ export default function AdminPricingPage() {
         setSaving(true);
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5000/api/admin/pricing/${editingPlan.planId}`, {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+            const response = await fetch(`${API_URL}/admin/pricing/${editingPlan.planId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -91,7 +93,8 @@ export default function AdminPricingPage() {
     const handleToggleEnabled = async (plan: PricingPlan) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5000/api/admin/pricing/${plan.planId}`, {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+            const response = await fetch(`${API_URL}/admin/pricing/${plan.planId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
