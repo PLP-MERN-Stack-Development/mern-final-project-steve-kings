@@ -12,3 +12,7 @@ PROJECT_ANALYSIS.md
 PRODUCT_VISION.md
 ERROR_FIX_REPORT.md
 docs/
+
+# Sensitive deployment configs (DO NOT COMMIT)
+RAILWAY_ENV_CONFIG.md
+*_ENV_CONFIG.md

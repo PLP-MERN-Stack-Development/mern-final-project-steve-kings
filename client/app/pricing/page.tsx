@@ -27,7 +27,8 @@ export default function PricingPage() {
 
     const fetchPricing = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/pricing');
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+            const response = await fetch(`${API_URL}/pricing`);
             if (response.ok) {
                 const data = await response.json();
                 setPlans(data.plans);

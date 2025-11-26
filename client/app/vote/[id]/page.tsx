@@ -59,7 +59,8 @@ export default function PublicVotingPage({ params }: { params: Promise<{ id: str
     }, [id]);
 
     useEffect(() => {
-        const socket = io('http://localhost:5000');
+        const socketUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
+        const socket = io(socketUrl);
 
         socket.emit('join_election', id);
 
