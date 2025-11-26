@@ -28,13 +28,23 @@ export default function PricingPage() {
     const fetchPricing = async () => {
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-            const response = await fetch(`${API_URL}/pricing`);
+            console.log('🔍 Fetching pricing from:', `${API_URL}/pricing`);
+            const response = await fetch(`${API_URL}/pricing`, {
+                cache: 'no-store', // Disable caching
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            console.log('📊 Response status:', response.status);
             if (response.ok) {
                 const data = await response.json();
+                console.log('✅ Pricing data received:', data.plans?.length, 'plans');
                 setPlans(data.plans);
+            } else {
+                console.error('❌ Failed to fetch pricing:', response.statusText);
             }
         } catch (error) {
-            console.error('Error fetching pricing:', error);
+            console.error('❌ Error fetching pricing:', error);
         } finally {
             setLoading(false);
         }
