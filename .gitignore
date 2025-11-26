@@ -5,3 +5,10 @@ build
 .DS_Store
 .vscode
 *_GUIDE.md
+
+# Documentation files (keep only README.md)
+PLATFORM_PITCH.md
+PROJECT_ANALYSIS.md
+PRODUCT_VISION.md
+ERROR_FIX_REPORT.md
+docs/
