@@ -29,6 +29,12 @@
   scroll-behavior: smooth;
 }
 
+/* Prevent horizontal overflow globally */
+html {
+  overflow-x: hidden;
+  width: 100%;
+}
+
 body {
   background-color: var(--color-background);
   color: var(--color-foreground);
@@ -36,6 +42,102 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  width: 100%;
+  position: relative;
+}
+
+/* Ensure all containers don't overflow */
+#__next,
+main,
+section {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Specific fix for dashboard and voting pages */
+.min-h-screen {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Fix for max-w containers */
+.max-w-7xl,
+.max-w-6xl,
+.max-w-5xl,
+.max-w-4xl,
+.max-w-3xl,
+.max-w-2xl,
+.max-w-xl {
+  width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .max-w-7xl,
+  .max-w-6xl,
+  .max-w-5xl,
+  .max-w-4xl,
+  .max-w-3xl,
+  .max-w-2xl,
+  .max-w-xl {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .max-w-7xl,
+  .max-w-6xl,
+  .max-w-5xl,
+  .max-w-4xl,
+  .max-w-3xl,
+  .max-w-2xl,
+  .max-w-xl {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Fix for images and media */
+img,
+video,
+iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Prevent text overflow */
+h1, h2, h3, h4, h5, h6, p, span, a {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+}
+
+/* Fix for tables */
+table {
+  width: 100%;
+  table-layout: auto;
+}
+
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Fix for grids on mobile */
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Ensure cards don't overflow */
+.card,
+.bg-white,
+.rounded-xl,
+.rounded-lg {
+  max-width: 100%;
+  overflow: hidden;
 }
 
 /* Scroll animations */
